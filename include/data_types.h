@@ -44,7 +44,7 @@ namespace data_types
         EdgeIdList adjList() { return adjList_; }
         EdgeIdList adjList() const { return adjList_; }
 
-        bool addEdge(const EdgeId &id)
+        virtual bool addEdge(const EdgeId &id)
         {
             auto edgeIt = std::find(adjList_.begin(), adjList_.end(), id);
             if (edgeIt == adjList_.end())
@@ -56,7 +56,7 @@ namespace data_types
             return false;
         }
 
-        bool removeEdge(const EdgeId &id)
+        virtual bool removeEdge(const EdgeId &id)
         {
             auto edgeIt = std::find(adjList_.begin(), adjList_.end(), id);
             if (edgeIt != adjList_.end())
@@ -94,6 +94,19 @@ namespace data_types
 
         ~Edge() {}
 
+        EdgeId id() { return id_; }
+        EdgeId id() const { return id_; }
+
+        VertexId srcVertexId() { return srcId_; }
+        VertexId srcVertexId() const { return srcId_; }
+
+        VertexId destVertexId() { return destId_; }
+        VertexId destVertexId() const { return destId_; }
+
+        T weight() { return weight_; }
+        T weight() const { return weight_; }
+
+    private:
         static EdgeId idCounter_;
         EdgeId id_;
         VertexId srcId_;

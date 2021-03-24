@@ -16,6 +16,9 @@ namespace graph
         ~Graph() {}
 
         Graph clone();
+        Graph clone() const;
+
+        void clear();
 
         template <class U>
         friend std::ostream &operator<<(std::ostream &, const Graph<U> &);
@@ -47,7 +50,15 @@ namespace graph
          * E: len(edges) in graph
          * Time : O(V+E)
          * Space: O(V)
-         * Use cases: count connected components, determine connectivity, find bridges/articulation points
+         * DFS algorithm can be used as is or augmented to,
+         * * Compute MST
+         * * Detect and find cycles
+         * * Check if graph is bipartite
+         * * Find strongly connected components
+         * * Topologically sort nodes of graph
+         * * Find bridges and articulation points
+         * * Find augmenting paths in a flow network
+         * * Generate mazes
         */
         VertexIdList dfsTraversal(const VertexId &);
         VertexIdList dfsTraversal(const VertexId &) const;
@@ -92,6 +103,41 @@ namespace graph
     Graph<T>::Graph(const EdgeMap<T> &edgeMap)
     {
         edgeMap_ = edgeMap;
+    }
+
+    template <class T>
+    Graph<T> Graph<T>::clone()
+    {
+        Graph<T> clonedGraph;
+
+        for (auto vertexPair : vertices())
+            clonedGraph.addVertex(vertexPair.second);
+
+        for (auto edgePair : edges())
+            clonedGraph.addEdge(edgePair.second);
+
+        return clonedGraph;
+    }
+
+    template <class T>
+    Graph<T> Graph<T>::clone() const
+    {
+        Graph<T> clonedGraph;
+
+        for (auto vertexPair : vertices())
+            clonedGraph.addVertex(vertexPair.second);
+
+        for (auto edgePair : edges())
+            clonedGraph.addEdge(edgePair.second);
+
+        return clonedGraph;
+    }
+
+    template <class T>
+    void Graph<T>::clear()
+    {
+        edgeMap_.clear();
+        vertexMap_.clear();
     }
 
     template <class U>
@@ -157,18 +203,18 @@ namespace graph
     template <class T>
     bool Graph<T>::addEdge(const Edge<T> &edge)
     {
-        if (edgeMap_.find(edge.id_) == edgeMap_.end())
+        if (edgeMap_.find(edge.id()) == edgeMap_.end())
         {
-            edgeMap_.emplace(edge.id_, edge);
+            edgeMap_.emplace(edge.id(), edge);
 
-            VertexMap::iterator srcVertexIt = addVertex(Vertex(edge.srcId_)).first;
-            VertexMap::iterator dstVertexIt = addVertex(Vertex(edge.destId_)).first;
+            VertexMap::iterator srcVertexIt = addVertex(Vertex(edge.srcVertexId())).first;
+            VertexMap::iterator dstVertexIt = addVertex(Vertex(edge.destVertexId())).first;
 
-            if (!srcVertexIt->second.addEdge(edge.id_))
-                std::cout << "Could not add edge [" << edge.id_ << "] to vertex [" << srcVertexIt->first << "]\n";
+            if (!srcVertexIt->second.addEdge(edge.id()))
+                std::cout << "Could not add edge [" << edge.id() << "] to vertex [" << srcVertexIt->first << "]\n";
 
-            if (!dstVertexIt->second.addEdge(edge.id_))
-                std::cout << "Could not add edge [" << edge.id_ << "] to vertex [" << dstVertexIt->first << "]\n";
+            if (!dstVertexIt->second.addEdge(edge.id()))
+                std::cout << "Could not add edge [" << edge.id() << "] to vertex [" << dstVertexIt->first << "]\n";
 
             return true;
         }
@@ -194,14 +240,14 @@ namespace graph
     bool Graph<T>::removeEdge(const EdgeId &id)
     {
         std::shared_ptr<Edge<T>> edgeToRemove = edge(id);
-        std::shared_ptr<Vertex> srcVertex = vertex(edgeToRemove->srcId_);
-        std::shared_ptr<Vertex> destVertex = vertex(edgeToRemove->destId_);
+        std::shared_ptr<Vertex> srcVertex = vertex(edgeToRemove->srcVertexId());
+        std::shared_ptr<Vertex> destVertex = vertex(edgeToRemove->destVertexId());
 
         if (srcVertex)
-            srcVertex->removeEdge(edgeToRemove->id_);
+            srcVertex->removeEdge(edgeToRemove->id());
 
         if (destVertex)
-            destVertex->removeEdge(edgeToRemove->id_);
+            destVertex->removeEdge(edgeToRemove->id());
 
         return true;
     }
@@ -290,10 +336,10 @@ namespace graph
                 continue;
             }
 
-            if (vertexPtr->id() == edgePtr->srcId_)
-                __dfsTraversalRecursive(edgePtr->destId_, visited, traversalOrder);
+            if (vertexPtr->id() == edgePtr->srcVertexId())
+                __dfsTraversalRecursive(edgePtr->destVertexId(), visited, traversalOrder);
             else
-                __dfsTraversalRecursive(edgePtr->srcId_, visited, traversalOrder);
+                __dfsTraversalRecursive(edgePtr->srcVertexId(), visited, traversalOrder);
         }
     }
 
@@ -323,10 +369,10 @@ namespace graph
                 continue;
             }
 
-            if (vertexPtr->id() == edgePtr->srcId_)
-                __dfsTraversalRecursive(edgePtr->destId_, visited, traversalOrder);
+            if (vertexPtr->id() == edgePtr->srcVertexId())
+                __dfsTraversalRecursive(edgePtr->destVertexId(), visited, traversalOrder);
             else
-                __dfsTraversalRecursive(edgePtr->srcId_, visited, traversalOrder);
+                __dfsTraversalRecursive(edgePtr->srcVertexId(), visited, traversalOrder);
         }
     }
 
