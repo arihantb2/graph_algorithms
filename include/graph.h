@@ -40,7 +40,7 @@ namespace graph
 
         std::pair<VertexMap::iterator, bool> addVertex(const Vertex &);
         std::pair<VertexMap::iterator, bool> addVertex(const VertexId &);
-        bool addEdge(const Edge<T> &);
+        std::pair<EdgeId, bool> addEdge(const Edge<T> &);
 
         bool removeVertex(const VertexId &);
         bool removeEdge(const EdgeId &);
@@ -201,7 +201,7 @@ namespace graph
     }
 
     template <class T>
-    bool Graph<T>::addEdge(const Edge<T> &edge)
+    std::pair<EdgeId, bool> Graph<T>::addEdge(const Edge<T> &edge)
     {
         if (edgeMap_.find(edge.id()) == edgeMap_.end())
         {
@@ -216,10 +216,10 @@ namespace graph
             if (!dstVertexIt->second.addEdge(edge.id()))
                 std::cout << "Could not add edge [" << edge.id() << "] to vertex [" << dstVertexIt->first << "]\n";
 
-            return true;
+            return std::make_pair(edge.id(), true);
         }
 
-        return false;
+        return std::make_pair(edge.id(), false);
     }
 
     template <class T>
@@ -240,6 +240,11 @@ namespace graph
     bool Graph<T>::removeEdge(const EdgeId &id)
     {
         std::shared_ptr<Edge<T>> edgeToRemove = edge(id);
+        if (!edgeToRemove)
+            return false;
+
+        edgeMap_.erase(id);
+
         std::shared_ptr<Vertex> srcVertex = vertex(edgeToRemove->srcVertexId());
         std::shared_ptr<Vertex> destVertex = vertex(edgeToRemove->destVertexId());
 

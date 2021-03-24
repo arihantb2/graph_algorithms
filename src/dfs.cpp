@@ -6,6 +6,7 @@
 template <class T>
 data_types::EdgeId data_types::Edge<T>::idCounter_ = 0;
 data_types::VertexId data_types::Vertex::idCounter_ = 0;
+
 int main(int argc, char const *argv[])
 {
     graph::Graph<double> graph;
