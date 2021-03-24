@@ -1,5 +1,0 @@
-/home/arihant/ws/cpp_ws/src/graph_algorithms/build/CMakeFiles/rebuild_cache.dir
-/home/arihant/ws/cpp_ws/src/graph_algorithms/build/CMakeFiles/edit_cache.dir
-/home/arihant/ws/cpp_ws/src/graph_algorithms/build/CMakeFiles/test.dir
-/home/arihant/ws/cpp_ws/src/graph_algorithms/build/CMakeFiles/connected_components.dir
-/home/arihant/ws/cpp_ws/src/graph_algorithms/build/CMakeFiles/dfs.dir

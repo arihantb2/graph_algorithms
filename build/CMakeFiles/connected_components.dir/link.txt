@@ -1,1 +1,0 @@
-/usr/bin/g++-10     CMakeFiles/connected_components.dir/src/connected_components.cpp.o  -o connected_components 
