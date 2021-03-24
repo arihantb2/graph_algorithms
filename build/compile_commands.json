@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/arihant/ws/cpp_ws/src/graph_algorithms/build",
+  "command": "/usr/bin/g++-10   -I/home/arihant/ws/cpp_ws/src/graph_algorithms/include -I/usr/local/include    -o CMakeFiles/connected_components.dir/src/connected_components.cpp.o -c /home/arihant/ws/cpp_ws/src/graph_algorithms/src/connected_components.cpp",
+  "file": "/home/arihant/ws/cpp_ws/src/graph_algorithms/src/connected_components.cpp"
+},
+{
+  "directory": "/home/arihant/ws/cpp_ws/src/graph_algorithms/build",
+  "command": "/usr/bin/g++-10   -I/home/arihant/ws/cpp_ws/src/graph_algorithms/include -I/usr/local/include    -o CMakeFiles/dfs.dir/src/dfs.cpp.o -c /home/arihant/ws/cpp_ws/src/graph_algorithms/src/dfs.cpp",
+  "file": "/home/arihant/ws/cpp_ws/src/graph_algorithms/src/dfs.cpp"
+}
+]

@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/data_types.h
+bits/stdc++.h
+-
+
+../include/graph.h
+data_types.h
+-
+
+/home/arihant/ws/cpp_ws/src/graph_algorithms/src/main.cpp
+graph.h
+-
+data_types.h
+-
+
