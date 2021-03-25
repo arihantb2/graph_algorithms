@@ -61,7 +61,41 @@ namespace graph
          * * Generate mazes
         */
         VertexIdList dfsTraversal(const VertexId &);
+
+        /*
+         * V: len(vertices) in graph
+         * E: len(edges) in graph
+         * Time : O(V+E)
+         * Space: O(V)
+         * DFS algorithm can be used as is or augmented to,
+         * * Compute MST
+         * * Detect and find cycles
+         * * Check if graph is bipartite
+         * * Find strongly connected components
+         * * Topologically sort nodes of graph
+         * * Find bridges and articulation points
+         * * Find augmenting paths in a flow network
+         * * Generate mazes
+        */
         VertexIdList dfsTraversal(const VertexId &) const;
+
+        /*
+         * V: len(vertices) in graph
+         * E: len(edges) in graph
+         * Time : O(V+E)
+         * Space: O(V)
+         * BFS algorithm is particularly useful for finding shortest path on unweighted graphs
+        */
+        VertexIdList bfsTraversal(const VertexId &);
+
+        /*
+         * V: len(vertices) in graph
+         * E: len(edges) in graph
+         * Time : O(V+E)
+         * Space: O(V)
+         * BFS algorithm is particularly useful for finding shortest path on unweighted graphs
+        */
+        VertexIdList bfsTraversal(const VertexId &) const;
 
         class ConnectedComponents
         {
@@ -285,6 +319,98 @@ namespace graph
             visited[vertex.first] = false;
 
         __dfsTraversalRecursive(startId, visited, traversalOrder);
+
+        return traversalOrder;
+    }
+
+    template <class T>
+    VertexIdList Graph<T>::bfsTraversal(const VertexId &startId)
+    {
+        VertexIdList traversalOrder;
+        traversalOrder.clear();
+
+        std::deque<VertexId> vertexQueue;
+
+        std::map<VertexId, bool> visited;
+        visited.clear();
+        for (const auto vertexPair : vertices())
+            visited[vertexPair.first] = false;
+
+        vertexQueue.push_back(startId);
+        while (!vertexQueue.empty())
+        {
+            VertexId vertexId = vertexQueue.front();
+            vertexQueue.pop_front();
+
+            if (visited[vertexId])
+                continue;
+
+            VertexPtr vertexPtr = vertex(vertexId);
+            if (!vertexPtr)
+                continue;
+
+            visited[vertexId] = true;
+            traversalOrder.push_back(vertexId);
+
+            for (const auto edgeId : vertexPtr->adjList())
+            {
+                EdgePtr<T> edgePtr = edge(edgeId);
+                if (!edgePtr)
+                    continue;
+
+                if (vertexId == edgePtr->srcVertexId())
+                    vertexQueue.push_back(edgePtr->destVertexId());
+
+                else
+                    vertexQueue.push_back(edgePtr->srcVertexId());
+            }
+        }
+
+        return traversalOrder;
+    }
+
+    template <class T>
+    VertexIdList Graph<T>::bfsTraversal(const VertexId &startId) const
+    {
+        VertexIdList traversalOrder;
+        traversalOrder.clear();
+
+        std::deque<VertexId> vertexQueue;
+
+        std::map<VertexId, bool> visited;
+        visited.clear();
+        for (const auto vertexPair : vertices())
+            visited[vertexPair.first] = false;
+
+        vertexQueue.push_back(startId);
+        while (!vertexQueue.empty())
+        {
+            VertexId vertexId = vertexQueue.front();
+            vertexQueue.pop_front();
+
+            if (visited[vertexId])
+                continue;
+
+            VertexPtr vertexPtr = vertex(vertexId);
+            if (!vertexPtr)
+                continue;
+
+            visited[vertexId] = true;
+            traversalOrder.push_back(vertexId);
+
+            for (const auto edgeId : vertexPtr->adjList())
+            {
+                EdgePtr<T> edgePtr = edge(edgeId);
+                if (!edgePtr)
+                    continue;
+
+                if (vertexId == edgePtr->srcVertexId())
+                    vertexQueue.push_back(edgePtr->destVertexId());
+
+                else
+                    vertexQueue.push_back(edgePtr->srcVertexId());
+            }
+        }
 
         return traversalOrder;
     }
