@@ -43,11 +43,18 @@ int main(int argc, char const *argv[])
 
     std::cout << graph << std::endl;
 
-    data_types::VertexIdList traversalOrder = graph.bfsTraversal(graph.vertices().begin()->first);
+    std::map<data_types::VertexId, std::shared_ptr<data_types::VertexId>> previousVertex;
+    data_types::VertexIdList traversalOrder = graph.bfsTraversal(graph.vertices().begin()->first, previousVertex);
 
     std::cout << "BFS Traversal Order with start vertex [" << graph.vertices().begin()->first << "]: [\n";
     for (const auto vertexId : traversalOrder)
-        std::cout << "\t" << vertexId << std::endl;
+    {
+        std::cout << "\t" << vertexId;
+        if ((previousVertex.find(vertexId) != previousVertex.end()) && previousVertex[vertexId])
+            std::cout << " <-- " << *previousVertex[vertexId] << std::endl;
+        else
+            std::cout << " <-- nullptr" << std::endl;
+    }
     std::cout << "]\n";
 
     return 0;

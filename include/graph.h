@@ -86,7 +86,7 @@ namespace graph
          * Space: O(V)
          * BFS algorithm is particularly useful for finding shortest path on unweighted graphs
         */
-        VertexIdList bfsTraversal(const VertexId &);
+        VertexIdList bfsTraversal(const VertexId &, std::map<VertexId, std::shared_ptr<VertexId>> &);
 
         /*
          * V: len(vertices) in graph
@@ -95,7 +95,7 @@ namespace graph
          * Space: O(V)
          * BFS algorithm is particularly useful for finding shortest path on unweighted graphs
         */
-        VertexIdList bfsTraversal(const VertexId &) const;
+        VertexIdList bfsTraversal(const VertexId &, std::map<VertexId, std::shared_ptr<VertexId>> &) const;
 
         class ConnectedComponents
         {
@@ -324,7 +324,7 @@ namespace graph
     }
 
     template <class T>
-    VertexIdList Graph<T>::bfsTraversal(const VertexId &startId)
+    VertexIdList Graph<T>::bfsTraversal(const VertexId &startId, std::map<VertexId, std::shared_ptr<VertexId>> &previous)
     {
         VertexIdList traversalOrder;
         traversalOrder.clear();
@@ -333,8 +333,14 @@ namespace graph
 
         std::map<VertexId, bool> visited;
         visited.clear();
+        previous.clear();
         for (const auto vertexPair : vertices())
+        {
             visited[vertexPair.first] = false;
+            previous[vertexPair.first] = nullptr;
+        }
+
+        visited[startId] = true;
 
         vertexQueue.push_back(startId);
         while (!vertexQueue.empty())
@@ -342,14 +348,10 @@ namespace graph
             VertexId vertexId = vertexQueue.front();
             vertexQueue.pop_front();
 
-            if (visited[vertexId])
-                continue;
-
             VertexPtr vertexPtr = vertex(vertexId);
             if (!vertexPtr)
                 continue;
 
-            visited[vertexId] = true;
             traversalOrder.push_back(vertexId);
 
             for (const auto edgeId : vertexPtr->adjList())
@@ -358,11 +360,19 @@ namespace graph
                 if (!edgePtr)
                     continue;
 
+                VertexId pushId;
                 if (vertexId == edgePtr->srcVertexId())
-                    vertexQueue.push_back(edgePtr->destVertexId());
+                    pushId = edgePtr->destVertexId();
 
                 else
-                    vertexQueue.push_back(edgePtr->srcVertexId());
+                    pushId = edgePtr->srcVertexId();
+
+                if (visited[pushId])
+                    continue;
+
+                vertexQueue.push_back(pushId);
+                visited[pushId] = true;
+                previous[pushId] = std::make_shared<VertexId>(vertexId);
             }
         }
 
@@ -370,7 +380,7 @@ namespace graph
     }
 
     template <class T>
-    VertexIdList Graph<T>::bfsTraversal(const VertexId &startId) const
+    VertexIdList Graph<T>::bfsTraversal(const VertexId &startId, std::map<VertexId, std::shared_ptr<VertexId>> &previous) const
     {
         VertexIdList traversalOrder;
         traversalOrder.clear();
@@ -379,8 +389,14 @@ namespace graph
 
         std::map<VertexId, bool> visited;
         visited.clear();
+        previous.clear();
         for (const auto vertexPair : vertices())
+        {
             visited[vertexPair.first] = false;
+            previous[vertexPair.first] = nullptr;
+        }
+
+        visited[startId] = true;
 
         vertexQueue.push_back(startId);
         while (!vertexQueue.empty())
@@ -388,14 +404,10 @@ namespace graph
             VertexId vertexId = vertexQueue.front();
             vertexQueue.pop_front();
 
-            if (visited[vertexId])
-                continue;
-
             VertexPtr vertexPtr = vertex(vertexId);
             if (!vertexPtr)
                 continue;
 
-            visited[vertexId] = true;
             traversalOrder.push_back(vertexId);
 
             for (const auto edgeId : vertexPtr->adjList())
@@ -404,11 +416,19 @@ namespace graph
                 if (!edgePtr)
                     continue;
 
+                VertexId pushId;
                 if (vertexId == edgePtr->srcVertexId())
-                    vertexQueue.push_back(edgePtr->destVertexId());
+                    pushId = edgePtr->destVertexId();
 
                 else
-                    vertexQueue.push_back(edgePtr->srcVertexId());
+                    pushId = edgePtr->srcVertexId();
+
+                if (visited[pushId])
+                    continue;
+
+                vertexQueue.push_back(pushId);
+                visited[pushId] = true;
+                previous[pushId] = std::make_shared<VertexId>(vertexId);
             }
         }
 
