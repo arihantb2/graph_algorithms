@@ -11,7 +11,7 @@ int main(int argc, char const *argv[])
 {
     assert((argc == 2) && "Exactly one argument required after executable name. Usage:<bfs-executable> <yaml-config-file-path>");
 
-    graph::Graph<double> graph = graph_loader::loadGraphFromFile<double>(std::string(argv[1]));
+    graph::Graph<double> graph = yaml_loader::loadGraphFromFile<double>(std::string(argv[1]));
     std::cout << graph << std::endl;
 
     graph::Graph<double>::ConnectedComponents connectedComponents = graph.findConnectedComponents();

@@ -1,7 +1,7 @@
 #include <yaml-cpp/yaml.h>
 #include <graph.h>
 
-namespace graph_loader
+namespace yaml_loader
 {
     template <class T>
     static graph::Graph<T> loadGraphFromFile(std::string filename)
