@@ -13,6 +13,7 @@ namespace graph
         Graph() {}
         Graph(const EdgeList<T> &);
         Graph(const EdgeMap<T> &);
+        Graph(const Graph<T> &);
         ~Graph() {}
 
         Graph clone();
@@ -38,12 +39,12 @@ namespace graph
         size_t numVertices() { return vertexMap_.size(); }
         size_t numEdges() { return edgeMap_.size(); }
 
-        std::pair<VertexMap::iterator, bool> addVertex(const Vertex &);
-        std::pair<VertexMap::iterator, bool> addVertex(const VertexId &);
-        std::pair<EdgeId, bool> addEdge(const Edge<T> &);
+        std::pair<VertexMap::iterator, bool> addVertex(const VertexId &id) { return __addVertex(id) ;}
+        std::pair<VertexMap::iterator, bool> addVertex(const Vertex &vertex) { return __addVertex(vertex); }
+        std::pair<EdgeId, bool> addEdge(const Edge<T> &edge) { return __addEdge(edge); }
 
-        bool removeVertex(const VertexId &);
-        bool removeEdge(const EdgeId &);
+        bool removeVertex(const VertexId &id) { return __removeVertex(id); }
+        bool removeEdge(const EdgeId &id) { return __removeEdge(id); }
 
         class DFSResult
         {
@@ -135,13 +136,22 @@ namespace graph
          * V: len(vertices) in graph
          * E: len(edges) in graph
          * Time: O(V+E)
+         * Topological sort only works on a Directed Acyclic Graph and is used to compute program/build among other applications
+         * Topological sort is also useful for solving the single source shortest path (SSSP) problem on a Directed Acyclic Graph
         */
         VertexIdList topologicalSort();
         VertexIdList topologicalSort() const;
 
     private:
-        void __dfsTraversalRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &, bool postOrder = false);
-        void __dfsTraversalRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &, bool postOrder = false) const;
+        std::pair<VertexMap::iterator, bool> __addVertex(const VertexId &);
+        std::pair<VertexMap::iterator, bool> __addVertex(const Vertex &);
+        std::pair<EdgeId, bool> __addEdge(const Edge<T> &);
+
+        bool __removeVertex(const VertexId &);
+        bool __removeEdge(const EdgeId &);
+
+        void __dfsRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &, bool postOrder = false);
+        void __dfsRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &, bool postOrder = false) const;
 
         VertexMap vertexMap_;
         EdgeMap<T> edgeMap_;
@@ -157,7 +167,18 @@ namespace graph
     template <class T>
     Graph<T>::Graph(const EdgeMap<T> &edgeMap)
     {
-        edgeMap_ = edgeMap;
+        for (auto edgePair : edgeMap)
+            addEdge(edgePair.second);
+    }
+
+    template <class T>
+    Graph<T>::Graph(const Graph<T> &graph)
+    {
+        for (auto vertexPair : graph.vertices())
+            addVertex(vertexPair.second);
+
+        for (auto edgePair : graph.edges())
+            addEdge(edgePair.second);
     }
 
     template <class T>
@@ -242,13 +263,13 @@ namespace graph
     }
 
     template <class T>
-    std::pair<VertexMap::iterator, bool> Graph<T>::addVertex(const VertexId &id)
+    std::pair<VertexMap::iterator, bool> Graph<T>::__addVertex(const VertexId &id)
     {
-        return addVertex(Vertex(id));
+        return __addVertex(Vertex(id));
     }
 
     template <class T>
-    std::pair<VertexMap::iterator, bool> Graph<T>::addVertex(const Vertex &vertex)
+    std::pair<VertexMap::iterator, bool> Graph<T>::__addVertex(const Vertex &vertex)
     {
         std::pair<VertexMap::iterator, bool> result = vertexMap_.emplace(vertex.id(), vertex);
 
@@ -256,15 +277,15 @@ namespace graph
     }
 
     template <class T>
-    std::pair<EdgeId, bool> Graph<T>::addEdge(const Edge<T> &edge)
+    std::pair<EdgeId, bool> Graph<T>::__addEdge(const Edge<T> &edge)
     {
         if (edgeMap_.find(edge.id()) == edgeMap_.end())
         {
             edgeMap_.emplace(edge.id(), edge);
 
             VertexPair vertexPair = edge.getVertexIDs();
-            VertexMap::iterator srcVertexIt = addVertex(vertexPair.first).first;
-            VertexMap::iterator dstVertexIt = addVertex(vertexPair.second).first;
+            VertexMap::iterator srcVertexIt = __addVertex(vertexPair.first).first;
+            VertexMap::iterator dstVertexIt = __addVertex(vertexPair.second).first;
 
             if (!srcVertexIt->second.addEdgeId(edge.id()))
                 std::cout << "Could not add edge [" << edge.id() << "] to vertex [" << srcVertexIt->first << "]\n";
@@ -281,21 +302,21 @@ namespace graph
     }
 
     template <class T>
-    bool Graph<T>::removeVertex(const VertexId &id)
+    bool Graph<T>::__removeVertex(const VertexId &id)
     {
         std::shared_ptr<Vertex> vertexToRemove = vertex(id);
         if (!vertexToRemove)
             return false;
 
         for (const auto edgeId : vertexToRemove->adjList())
-            removeEdge(edgeId);
+            __removeEdge(edgeId);
 
         vertexMap_.erase(vertexToRemove->id());
         return true;
     }
 
     template <class T>
-    bool Graph<T>::removeEdge(const EdgeId &id)
+    bool Graph<T>::__removeEdge(const EdgeId &id)
     {
         std::shared_ptr<Edge<T>> edgeToRemove = edge(id);
         if (!edgeToRemove)
@@ -327,7 +348,7 @@ namespace graph
         for (auto vertex : vertices())
             visited[vertex.first] = false;
 
-        __dfsTraversalRecursive(startId, visited, result.traversalOrder_);
+        __dfsRecursive(startId, visited, result.traversalOrder_);
 
         return result;
     }
@@ -343,7 +364,7 @@ namespace graph
         for (auto vertex : vertices())
             visited[vertex.first] = false;
 
-        __dfsTraversalRecursive(startId, visited, result.traversalOrder_);
+        __dfsRecursive(startId, visited, result.traversalOrder_);
 
         return result;
     }
@@ -470,7 +491,7 @@ namespace graph
             if (!visited[vertexPair.first])
             {
                 traversalOrder.clear();
-                __dfsTraversalRecursive(vertexPair.first, visited, traversalOrder);
+                __dfsRecursive(vertexPair.first, visited, traversalOrder);
 
                 connectedComponents.count_++;
                 connectedComponents.components_.push_back(traversalOrder);
@@ -496,7 +517,7 @@ namespace graph
             if (!visited[vertexPair.first])
             {
                 traversalOrder.clear();
-                __dfsTraversalRecursive(vertexPair.first, visited, traversalOrder);
+                __dfsRecursive(vertexPair.first, visited, traversalOrder);
 
                 connectedComponents.count_++;
                 connectedComponents.components_.push_back(traversalOrder);
@@ -522,7 +543,7 @@ namespace graph
             if (!visited[vertexPair.first])
             {
                 postTraversal.clear();
-                __dfsTraversalRecursive(vertexPair.first, visited, postTraversal, true);
+                __dfsRecursive(vertexPair.first, visited, postTraversal, true);
 
                 for (const auto vertexId : postTraversal)
                     ordering.push_front(vertexId);
@@ -548,7 +569,7 @@ namespace graph
             if (!visited[vertexPair.first])
             {
                 postTraversal.clear();
-                __dfsTraversalRecursive(vertexPair.first, visited, postTraversal, true);
+                __dfsRecursive(vertexPair.first, visited, postTraversal, true);
 
                 for (const auto vertexId : postTraversal)
                     ordering.push_front(vertexId);
@@ -559,7 +580,7 @@ namespace graph
     }
 
     template <class T>
-    void Graph<T>::__dfsTraversalRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder)
+    void Graph<T>::__dfsRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder)
     {
         if (visited[id])
             return;
@@ -590,7 +611,7 @@ namespace graph
             if (nextVertex.second == false)
                 continue;
 
-            __dfsTraversalRecursive(nextVertex.first, visited, traversalOrder, postOrder);
+            __dfsRecursive(nextVertex.first, visited, traversalOrder, postOrder);
         }
 
         if (postOrder)
@@ -598,7 +619,7 @@ namespace graph
     }
 
     template <class T>
-    void Graph<T>::__dfsTraversalRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder) const
+    void Graph<T>::__dfsRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder) const
     {
         if (visited[id])
             return;
@@ -629,7 +650,7 @@ namespace graph
             if (nextVertex.second == false)
                 continue;
 
-            __dfsTraversalRecursive(nextVertex.first, visited, traversalOrder, postOrder);
+            __dfsRecursive(nextVertex.first, visited, traversalOrder, postOrder);
         }
 
         if (postOrder)
