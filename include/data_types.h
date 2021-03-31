@@ -17,15 +17,15 @@ namespace data_types
     template <class T>
     using EdgePtr = std::shared_ptr<Edge<T>>;
 
-    using VertexIdList = std::vector<VertexId>;
-    using EdgeIdList = std::vector<EdgeId>;
+    using VertexIdList = std::deque<VertexId>;
+    using EdgeIdList = std::deque<EdgeId>;
 
     using VertexPair = std::pair<VertexId, VertexId>;
-    using VertexList = std::vector<Vertex>;
+    using VertexList = std::deque<Vertex>;
     using VertexMap = std::map<VertexId, Vertex>;
 
     template <class T>
-    using EdgeList = std::vector<Edge<T>>;
+    using EdgeList = std::deque<Edge<T>>;
 
     template <class T>
     using EdgeMap = std::map<EdgeId, Edge<T>>;

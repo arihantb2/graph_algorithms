@@ -125,15 +125,23 @@ namespace graph
         /*
          * V: len(vertices) in graph
          * E: len(edges) in graph
-         * Time : O()
+         * Time : O(V+E)
          * Space: O()
         */
         ConnectedComponents findConnectedComponents();
         ConnectedComponents findConnectedComponents() const;
 
+        /*
+         * V: len(vertices) in graph
+         * E: len(edges) in graph
+         * Time: O(V+E)
+        */
+        VertexIdList topologicalSort();
+        VertexIdList topologicalSort() const;
+
     private:
-        void __dfsTraversalRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &);
-        void __dfsTraversalRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &) const;
+        void __dfsTraversalRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &, bool postOrder = false);
+        void __dfsTraversalRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &, bool postOrder = false) const;
 
         VertexMap vertexMap_;
         EdgeMap<T> edgeMap_;
@@ -346,7 +354,7 @@ namespace graph
         BFSResult result;
         result.traversalOrder_.clear();
 
-        std::deque<VertexId> vertexQueue;
+        VertexIdList vertexQueue;
 
         std::map<VertexId, bool> visited;
         visited.clear();
@@ -399,7 +407,7 @@ namespace graph
         BFSResult result;
         result.traversalOrder_.clear();
 
-        std::deque<VertexId> vertexQueue;
+        VertexIdList vertexQueue;
 
         std::map<VertexId, bool> visited;
         visited.clear();
@@ -473,41 +481,85 @@ namespace graph
     }
 
     template <class T>
-    void Graph<T>::__dfsTraversalRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder)
+    typename Graph<T>::ConnectedComponents Graph<T>::findConnectedComponents() const
     {
-        if (visited[id])
-            return;
+        std::map<VertexId, bool> visited;
+        visited.clear();
+        for (auto vertex : vertices())
+            visited[vertex.first] = false;
 
-        VertexPtr vertexPtr = vertex(id);
+        VertexIdList traversalOrder;
 
-        if (!vertexPtr)
+        ConnectedComponents connectedComponents;
+        for (const auto vertexPair : vertices())
         {
-            std::cout << "Vertex [" << id << "] cannot be read from graph\n";
-            return;
-        }
-
-        visited[id] = true;
-        traversalOrder.push_back(id);
-
-        for (auto edgeId : vertexPtr->adjList())
-        {
-            EdgePtr<T> edgePtr = edge(edgeId);
-            if (!edgePtr)
+            if (!visited[vertexPair.first])
             {
-                std::cout << "Edge [" << edgeId << "] cannot be read from graph\n";
-                continue;
+                traversalOrder.clear();
+                __dfsTraversalRecursive(vertexPair.first, visited, traversalOrder);
+
+                connectedComponents.count_++;
+                connectedComponents.components_.push_back(traversalOrder);
             }
-
-            std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(id);
-            if (nextVertex.second == false)
-                continue;
-
-            __dfsTraversalRecursive(nextVertex.first, visited, traversalOrder);
         }
+
+        return connectedComponents;
     }
 
     template <class T>
-    void Graph<T>::__dfsTraversalRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder) const
+    VertexIdList Graph<T>::topologicalSort()
+    {
+        std::map<VertexId, bool> visited;
+        visited.clear();
+        for (auto vertex : vertices())
+            visited[vertex.first] = false;
+
+        VertexIdList ordering;
+        VertexIdList postTraversal;
+
+        for (const auto vertexPair : vertices())
+        {
+            if (!visited[vertexPair.first])
+            {
+                postTraversal.clear();
+                __dfsTraversalRecursive(vertexPair.first, visited, postTraversal, true);
+
+                for (const auto vertexId : postTraversal)
+                    ordering.push_front(vertexId);
+            }
+        }
+
+        return ordering;
+    }
+
+    template <class T>
+    VertexIdList Graph<T>::topologicalSort() const
+    {
+        std::map<VertexId, bool> visited;
+        visited.clear();
+        for (auto vertex : vertices())
+            visited[vertex.first] = false;
+
+        VertexIdList ordering;
+        VertexIdList postTraversal;
+
+        for (const auto vertexPair : vertices())
+        {
+            if (!visited[vertexPair.first])
+            {
+                postTraversal.clear();
+                __dfsTraversalRecursive(vertexPair.first, visited, postTraversal, true);
+
+                for (const auto vertexId : postTraversal)
+                    ordering.push_front(vertexId);
+            }
+        }
+
+        return ordering;
+    }
+
+    template <class T>
+    void Graph<T>::__dfsTraversalRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder)
     {
         if (visited[id])
             return;
@@ -521,7 +573,9 @@ namespace graph
         }
 
         visited[id] = true;
-        traversalOrder.push_back(id);
+
+        if (!postOrder)
+            traversalOrder.push_back(id);
 
         for (auto edgeId : vertexPtr->adjList())
         {
@@ -536,8 +590,50 @@ namespace graph
             if (nextVertex.second == false)
                 continue;
 
-            __dfsTraversalRecursive(nextVertex.first, visited, traversalOrder);
+            __dfsTraversalRecursive(nextVertex.first, visited, traversalOrder, postOrder);
         }
+
+        if (postOrder)
+            traversalOrder.push_back(id);
+    }
+
+    template <class T>
+    void Graph<T>::__dfsTraversalRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder) const
+    {
+        if (visited[id])
+            return;
+
+        VertexPtr vertexPtr = vertex(id);
+
+        if (!vertexPtr)
+        {
+            std::cout << "Vertex [" << id << "] cannot be read from graph\n";
+            return;
+        }
+
+        visited[id] = true;
+
+        if (!postOrder)
+            traversalOrder.push_back(id);
+
+        for (auto edgeId : vertexPtr->adjList())
+        {
+            EdgePtr<T> edgePtr = edge(edgeId);
+            if (!edgePtr)
+            {
+                std::cout << "Edge [" << edgeId << "] cannot be read from graph\n";
+                continue;
+            }
+
+            std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(id);
+            if (nextVertex.second == false)
+                continue;
+
+            __dfsTraversalRecursive(nextVertex.first, visited, traversalOrder, postOrder);
+        }
+
+        if (postOrder)
+            traversalOrder.push_back(id);
     }
 
     template class Graph<double>;

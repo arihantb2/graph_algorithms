@@ -1,0 +1,21 @@
+graph:
+  vertices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+  edges:
+    - { src: 0, dst: 4, wt: 1.0, dir: True }
+    - { src: 0, dst: 8, wt: 1.0, dir: True }
+    - { src: 0, dst: 14, wt: 1.0, dir: True }
+    - { src: 0, dst: 13, wt: 1.0, dir: True }
+    - { src: 2, dst: 9, wt: 1.0, dir: True }
+    - { src: 4, dst: 8, wt: 1.0, dir: True }
+    - { src: 5, dst: 1, wt: 1.0, dir: True }
+    - { src: 5, dst: 16, wt: 1.0, dir: True }
+    - { src: 5, dst: 17, wt: 1.0, dir: True }
+    - { src: 6, dst: 7, wt: 1.0, dir: True }
+    - { src: 6, dst: 11, wt: 1.0, dir: True }
+    - { src: 7, dst: 11, wt: 1.0, dir: True }
+    - { src: 8, dst: 14, wt: 1.0, dir: True }
+    - { src: 9, dst: 3, wt: 1.0, dir: True }
+    - { src: 10, dst: 15, wt: 1.0, dir: True }
+    - { src: 15, dst: 2, wt: 1.0, dir: True }
+    - { src: 15, dst: 9, wt: 1.0, dir: True }
+    - { src: 13, dst: 14, wt: 1.0, dir: True }

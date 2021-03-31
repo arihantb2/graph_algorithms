@@ -19,6 +19,8 @@ target_link_libraries(bfs yaml-cpp)
 add_executable(connected_components src/connected_components.cpp)
 target_link_libraries(connected_components yaml-cpp)
 
+add_executable(topsort src/topsort.cpp)
+target_link_libraries(topsort yaml-cpp)
 
 add_executable(GraphManipulationTest src/test/unittest_GraphManipulation.cpp)
 target_link_libraries(GraphManipulationTest  ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} pthread)
