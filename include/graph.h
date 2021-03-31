@@ -45,22 +45,11 @@ namespace graph
         bool removeVertex(const VertexId &);
         bool removeEdge(const EdgeId &);
 
-        /*
-         * V: len(vertices) in graph
-         * E: len(edges) in graph
-         * Time : O(V+E)
-         * Space: O(V)
-         * DFS algorithm can be used as is or augmented to,
-         * * Compute MST
-         * * Detect and find cycles
-         * * Check if graph is bipartite
-         * * Find strongly connected components
-         * * Topologically sort nodes of graph
-         * * Find bridges and articulation points
-         * * Find augmenting paths in a flow network
-         * * Generate mazes
-        */
-        VertexIdList dfsTraversal(const VertexId &);
+        class DFSResult
+        {
+        public:
+            VertexIdList traversalOrder_;
+        };
 
         /*
          * V: len(vertices) in graph
@@ -77,7 +66,31 @@ namespace graph
          * * Find augmenting paths in a flow network
          * * Generate mazes
         */
-        VertexIdList dfsTraversal(const VertexId &) const;
+        DFSResult dfsTraversal(const VertexId &);
+
+        /*
+         * V: len(vertices) in graph
+         * E: len(edges) in graph
+         * Time : O(V+E)
+         * Space: O(V)
+         * DFS algorithm can be used as is or augmented to,
+         * * Compute MST
+         * * Detect and find cycles
+         * * Check if graph is bipartite
+         * * Find strongly connected components
+         * * Topologically sort nodes of graph
+         * * Find bridges and articulation points
+         * * Find augmenting paths in a flow network
+         * * Generate mazes
+        */
+        DFSResult dfsTraversal(const VertexId &) const;
+
+        class BFSResult
+        {
+        public:
+            VertexIdList traversalOrder_;
+            std::map<VertexId, std::shared_ptr<VertexId>> previousVertexMap_;
+        };
 
         /*
          * V: len(vertices) in graph
@@ -86,7 +99,7 @@ namespace graph
          * Space: O(V)
          * BFS algorithm is particularly useful for finding shortest path on unweighted graphs
         */
-        VertexIdList bfsTraversal(const VertexId &, std::map<VertexId, std::shared_ptr<VertexId>> &);
+        BFSResult bfsTraversal(const VertexId &);
 
         /*
          * V: len(vertices) in graph
@@ -95,7 +108,7 @@ namespace graph
          * Space: O(V)
          * BFS algorithm is particularly useful for finding shortest path on unweighted graphs
         */
-        VertexIdList bfsTraversal(const VertexId &, std::map<VertexId, std::shared_ptr<VertexId>> &) const;
+        BFSResult bfsTraversal(const VertexId &) const;
 
         class ConnectedComponents
         {
@@ -241,13 +254,16 @@ namespace graph
         {
             edgeMap_.emplace(edge.id(), edge);
 
-            VertexMap::iterator srcVertexIt = addVertex(Vertex(edge.srcVertexId())).first;
-            VertexMap::iterator dstVertexIt = addVertex(Vertex(edge.destVertexId())).first;
+            VertexPair vertexPair = edge.getVertexIDs();
+            VertexMap::iterator srcVertexIt = addVertex(vertexPair.first).first;
+            VertexMap::iterator dstVertexIt = addVertex(vertexPair.second).first;
 
-            if (!srcVertexIt->second.addEdge(edge.id()))
+            if (!srcVertexIt->second.addEdgeId(edge.id()))
                 std::cout << "Could not add edge [" << edge.id() << "] to vertex [" << srcVertexIt->first << "]\n";
 
-            if (!dstVertexIt->second.addEdge(edge.id()))
+            if (edge.directed())
+                ;
+            else if (!dstVertexIt->second.addEdgeId(edge.id()))
                 std::cout << "Could not add edge [" << edge.id() << "] to vertex [" << dstVertexIt->first << "]\n";
 
             return std::make_pair(edge.id(), true);
@@ -279,8 +295,9 @@ namespace graph
 
         edgeMap_.erase(id);
 
-        std::shared_ptr<Vertex> srcVertex = vertex(edgeToRemove->srcVertexId());
-        std::shared_ptr<Vertex> destVertex = vertex(edgeToRemove->destVertexId());
+        VertexPair vertexPair = edgeToRemove->getVertexIDs();
+        std::shared_ptr<Vertex> srcVertex = vertex(vertexPair.first);
+        std::shared_ptr<Vertex> destVertex = vertex(vertexPair.second);
 
         if (srcVertex)
             srcVertex->removeEdge(edgeToRemove->id());
@@ -292,52 +309,52 @@ namespace graph
     }
 
     template <class T>
-    VertexIdList Graph<T>::dfsTraversal(const VertexId &startId)
+    typename Graph<T>::DFSResult Graph<T>::dfsTraversal(const VertexId &startId)
     {
-        VertexIdList traversalOrder;
-        traversalOrder.clear();
+        DFSResult result;
+        result.traversalOrder_.clear();
 
         std::map<VertexId, bool> visited;
         visited.clear();
         for (auto vertex : vertices())
             visited[vertex.first] = false;
 
-        __dfsTraversalRecursive(startId, visited, traversalOrder);
+        __dfsTraversalRecursive(startId, visited, result.traversalOrder_);
 
-        return traversalOrder;
+        return result;
     }
 
     template <class T>
-    VertexIdList Graph<T>::dfsTraversal(const VertexId &startId) const
+    typename Graph<T>::DFSResult Graph<T>::dfsTraversal(const VertexId &startId) const
     {
-        VertexIdList traversalOrder;
-        traversalOrder.clear();
+        DFSResult result;
+        result.traversalOrder_.clear();
 
         std::map<VertexId, bool> visited;
         visited.clear();
         for (auto vertex : vertices())
             visited[vertex.first] = false;
 
-        __dfsTraversalRecursive(startId, visited, traversalOrder);
+        __dfsTraversalRecursive(startId, visited, result.traversalOrder_);
 
-        return traversalOrder;
+        return result;
     }
 
     template <class T>
-    VertexIdList Graph<T>::bfsTraversal(const VertexId &startId, std::map<VertexId, std::shared_ptr<VertexId>> &previous)
+    typename Graph<T>::BFSResult Graph<T>::bfsTraversal(const VertexId &startId)
     {
-        VertexIdList traversalOrder;
-        traversalOrder.clear();
+        BFSResult result;
+        result.traversalOrder_.clear();
 
         std::deque<VertexId> vertexQueue;
 
         std::map<VertexId, bool> visited;
         visited.clear();
-        previous.clear();
+        result.previousVertexMap_.clear();
         for (const auto vertexPair : vertices())
         {
             visited[vertexPair.first] = false;
-            previous[vertexPair.first] = nullptr;
+            result.previousVertexMap_[vertexPair.first] = nullptr;
         }
 
         visited[startId] = true;
@@ -352,7 +369,7 @@ namespace graph
             if (!vertexPtr)
                 continue;
 
-            traversalOrder.push_back(vertexId);
+            result.traversalOrder_.push_back(vertexId);
 
             for (const auto edgeId : vertexPtr->adjList())
             {
@@ -360,40 +377,37 @@ namespace graph
                 if (!edgePtr)
                     continue;
 
-                VertexId pushId;
-                if (vertexId == edgePtr->srcVertexId())
-                    pushId = edgePtr->destVertexId();
-
-                else
-                    pushId = edgePtr->srcVertexId();
-
-                if (visited[pushId])
+                std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(vertexId);
+                if (nextVertex.second == false)
                     continue;
 
-                vertexQueue.push_back(pushId);
-                visited[pushId] = true;
-                previous[pushId] = std::make_shared<VertexId>(vertexId);
+                if (visited[nextVertex.first])
+                    continue;
+
+                vertexQueue.push_back(nextVertex.first);
+                visited[nextVertex.first] = true;
+                result.previousVertexMap_[nextVertex.first] = std::make_shared<VertexId>(vertexId);
             }
         }
 
-        return traversalOrder;
+        return result;
     }
 
     template <class T>
-    VertexIdList Graph<T>::bfsTraversal(const VertexId &startId, std::map<VertexId, std::shared_ptr<VertexId>> &previous) const
+    typename Graph<T>::BFSResult Graph<T>::bfsTraversal(const VertexId &startId) const
     {
-        VertexIdList traversalOrder;
-        traversalOrder.clear();
+        BFSResult result;
+        result.traversalOrder_.clear();
 
         std::deque<VertexId> vertexQueue;
 
         std::map<VertexId, bool> visited;
         visited.clear();
-        previous.clear();
+        result.previousVertexMap_.clear();
         for (const auto vertexPair : vertices())
         {
             visited[vertexPair.first] = false;
-            previous[vertexPair.first] = nullptr;
+            result.previousVertexMap_[vertexPair.first] = nullptr;
         }
 
         visited[startId] = true;
@@ -408,7 +422,7 @@ namespace graph
             if (!vertexPtr)
                 continue;
 
-            traversalOrder.push_back(vertexId);
+            result.traversalOrder_.push_back(vertexId);
 
             for (const auto edgeId : vertexPtr->adjList())
             {
@@ -416,23 +430,20 @@ namespace graph
                 if (!edgePtr)
                     continue;
 
-                VertexId pushId;
-                if (vertexId == edgePtr->srcVertexId())
-                    pushId = edgePtr->destVertexId();
-
-                else
-                    pushId = edgePtr->srcVertexId();
-
-                if (visited[pushId])
+                std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(vertexId);
+                if (nextVertex.second == false)
                     continue;
 
-                vertexQueue.push_back(pushId);
-                visited[pushId] = true;
-                previous[pushId] = std::make_shared<VertexId>(vertexId);
+                if (visited[nextVertex.first])
+                    continue;
+
+                vertexQueue.push_back(nextVertex.first);
+                visited[nextVertex.first] = true;
+                result.previousVertexMap_[nextVertex.first] = std::make_shared<VertexId>(vertexId);
             }
         }
 
-        return traversalOrder;
+        return result;
     }
 
     template <class T>
@@ -487,10 +498,11 @@ namespace graph
                 continue;
             }
 
-            if (vertexPtr->id() == edgePtr->srcVertexId())
-                __dfsTraversalRecursive(edgePtr->destVertexId(), visited, traversalOrder);
-            else
-                __dfsTraversalRecursive(edgePtr->srcVertexId(), visited, traversalOrder);
+            std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(id);
+            if (nextVertex.second == false)
+                continue;
+
+            __dfsTraversalRecursive(nextVertex.first, visited, traversalOrder);
         }
     }
 
@@ -520,10 +532,11 @@ namespace graph
                 continue;
             }
 
-            if (vertexPtr->id() == edgePtr->srcVertexId())
-                __dfsTraversalRecursive(edgePtr->destVertexId(), visited, traversalOrder);
-            else
-                __dfsTraversalRecursive(edgePtr->srcVertexId(), visited, traversalOrder);
+            std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(id);
+            if (nextVertex.second == false)
+                continue;
+
+            __dfsTraversalRecursive(nextVertex.first, visited, traversalOrder);
         }
     }
 

@@ -1,0 +1,25 @@
+graph:
+  vertices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+  edges:
+    - { src: 0, dst: 4, wt: 1.0, dir: False }
+    - { src: 0, dst: 8, wt: 1.0, dir: False }
+    - { src: 0, dst: 14, wt: 1.0, dir: False }
+    - { src: 0, dst: 13, wt: 1.0, dir: False }
+    - { src: 1, dst: 5, wt: 1.0, dir: False }
+    - { src: 1, dst: 14, wt: 1.0, dir: False }
+    - { src: 2, dst: 9, wt: 1.0, dir: False }
+    - { src: 2, dst: 15, wt: 1.0, dir: False }
+    - { src: 3, dst: 9, wt: 1.0, dir: False }
+    - { src: 3, dst: 16, wt: 1.0, dir: False }
+    - { src: 4, dst: 8, wt: 1.0, dir: False }
+    - { src: 5, dst: 16, wt: 1.0, dir: False }
+    - { src: 5, dst: 17, wt: 1.0, dir: False }
+    - { src: 6, dst: 7, wt: 1.0, dir: False }
+    - { src: 6, dst: 11, wt: 1.0, dir: False }
+    - { src: 7, dst: 11, wt: 1.0, dir: False }
+    - { src: 7, dst: 12, wt: 1.0, dir: False }
+    - { src: 8, dst: 11, wt: 1.0, dir: False }
+    - { src: 8, dst: 14, wt: 1.0, dir: False }
+    - { src: 9, dst: 15, wt: 1.0, dir: False }
+    - { src: 10, dst: 15, wt: 1.0, dir: False }
+    - { src: 13, dst: 14, wt: 1.0, dir: False }

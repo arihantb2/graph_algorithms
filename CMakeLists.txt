@@ -11,8 +11,13 @@ enable_testing()
 include_directories(include ${GTEST_INCLUDE_DIRS})
 
 add_executable(dfs src/dfs.cpp)
+target_link_libraries(dfs yaml-cpp)
+
 add_executable(bfs src/bfs.cpp)
+target_link_libraries(bfs yaml-cpp)
+
 add_executable(connected_components src/connected_components.cpp)
+target_link_libraries(connected_components yaml-cpp)
 
 
 add_executable(GraphManipulationTest src/test/unittest_GraphManipulation.cpp)

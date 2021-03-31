@@ -20,6 +20,7 @@ namespace data_types
     using VertexIdList = std::vector<VertexId>;
     using EdgeIdList = std::vector<EdgeId>;
 
+    using VertexPair = std::pair<VertexId, VertexId>;
     using VertexList = std::vector<Vertex>;
     using VertexMap = std::map<VertexId, Vertex>;
 
@@ -44,7 +45,7 @@ namespace data_types
         EdgeIdList adjList() { return adjList_; }
         EdgeIdList adjList() const { return adjList_; }
 
-        virtual bool addEdge(const EdgeId &id)
+        virtual bool addEdgeId(const EdgeId &id)
         {
             auto edgeIt = std::find(adjList_.begin(), adjList_.end(), id);
             if (edgeIt == adjList_.end())
@@ -79,38 +80,64 @@ namespace data_types
     {
     public:
         Edge() = delete;
-        Edge(VertexId srcId, VertexId destId, T wt = T(1)) : id_(idCounter_++),
-                                                             srcId_(srcId),
-                                                             destId_(destId),
-                                                             weight_(wt) {}
-        Edge(const Vertex &src, const Vertex &dest, T wt = T(1)) : id_(idCounter_++),
-                                                                   srcId_(src.id_),
-                                                                   destId_(dest.id_),
-                                                                   weight_(wt) {}
+        Edge(VertexId srcId, VertexId dstId, T wt = T(1), bool directed = false) : id_(idCounter_++),
+                                                                                   srcId_(srcId),
+                                                                                   dstId_(dstId),
+                                                                                   weight_(wt),
+                                                                                   directed_(directed) {}
+        Edge(const Vertex &src, const Vertex &dest, T wt = T(1), bool directed = false) : id_(idCounter_++),
+                                                                                          srcId_(src.id_),
+                                                                                          dstId_(dest.id_),
+                                                                                          weight_(wt),
+                                                                                          directed_(directed) {}
         Edge(const Edge &other) : id_(other.id_),
                                   srcId_(other.srcId_),
-                                  destId_(other.destId_),
-                                  weight_(other.weight_) {}
+                                  dstId_(other.dstId_),
+                                  weight_(other.weight_),
+                                  directed_(other.directed()) {}
 
         ~Edge() {}
 
         EdgeId id() { return id_; }
         EdgeId id() const { return id_; }
 
-        VertexId srcVertexId() { return srcId_; }
-        VertexId srcVertexId() const { return srcId_; }
-
-        VertexId destVertexId() { return destId_; }
-        VertexId destVertexId() const { return destId_; }
+        bool directed() { return directed_; }
+        bool directed() const { return directed_; }
 
         T weight() { return weight_; }
         T weight() const { return weight_; }
 
-    private:
+        VertexPair getVertexIDs() { return std::make_pair(srcId_, dstId_); }
+        VertexPair getVertexIDs() const { return std::make_pair(srcId_, dstId_); }
+
+        std::pair<VertexId, bool> getNeighbor(const VertexId &id)
+        {
+            if (id == srcId_)
+                return std::make_pair(dstId_, true);
+
+            else if ((id == dstId_) && (directed_ == false))
+                return std::make_pair(srcId_, true);
+
+            return std::make_pair(id, false);
+        }
+
+        std::pair<VertexId, bool> getNeighbor(const VertexId &id) const
+        {
+            if (id == srcId_)
+                return std::make_pair(dstId_, true);
+
+            else if ((id == dstId_) && (directed_ == false))
+                return std::make_pair(srcId_, true);
+
+            return std::make_pair(id, false);
+        }
+
+    protected:
         static EdgeId idCounter_;
         EdgeId id_;
         VertexId srcId_;
-        VertexId destId_;
+        VertexId dstId_;
         T weight_;
+        bool directed_;
     };
 }
