@@ -8,14 +8,10 @@ namespace data_types
     using EdgeId = size_t;
 
     class Vertex;
-
-    template <class T>
     class Edge;
 
     using VertexPtr = std::shared_ptr<Vertex>;
-
-    template <class T>
-    using EdgePtr = std::shared_ptr<Edge<T>>;
+    using EdgePtr = std::shared_ptr<Edge>;
 
     using VertexIdList = std::deque<VertexId>;
     using EdgeIdList = std::deque<EdgeId>;
@@ -24,11 +20,8 @@ namespace data_types
     using VertexList = std::deque<Vertex>;
     using VertexMap = std::map<VertexId, Vertex>;
 
-    template <class T>
-    using EdgeList = std::deque<Edge<T>>;
-
-    template <class T>
-    using EdgeMap = std::map<EdgeId, Edge<T>>;
+    using EdgeList = std::deque<Edge>;
+    using EdgeMap = std::map<EdgeId, Edge>;
 
     class Vertex
     {
@@ -75,26 +68,28 @@ namespace data_types
         EdgeIdList adjList_;
     };
 
-    template <class T = int>
     class Edge
     {
     public:
         Edge() = delete;
-        Edge(VertexId srcId, VertexId dstId, T wt = T(1), bool directed = false) : id_(idCounter_++),
-                                                                                   srcId_(srcId),
-                                                                                   dstId_(dstId),
-                                                                                   weight_(wt),
-                                                                                   directed_(directed) {}
-        Edge(const Vertex &src, const Vertex &dest, T wt = T(1), bool directed = false) : id_(idCounter_++),
-                                                                                          srcId_(src.id_),
-                                                                                          dstId_(dest.id_),
-                                                                                          weight_(wt),
-                                                                                          directed_(directed) {}
+        Edge(VertexId srcId, VertexId dstId, double wt = 1.0, bool directed = false) : id_(idCounter_++),
+                                                                                       srcId_(srcId),
+                                                                                       dstId_(dstId),
+                                                                                       weight_(wt),
+                                                                                       directed_(directed) {}
+        Edge(const Vertex &src, const Vertex &dest, double wt = 1.0, bool directed = false) : id_(idCounter_++),
+                                                                                              srcId_(src.id()),
+                                                                                              dstId_(dest.id()),
+                                                                                              weight_(wt),
+                                                                                              directed_(directed) {}
         Edge(const Edge &other) : id_(other.id_),
-                                  srcId_(other.srcId_),
-                                  dstId_(other.dstId_),
                                   weight_(other.weight_),
-                                  directed_(other.directed()) {}
+                                  directed_(other.directed())
+        {
+            VertexPair vertexPair = other.getVertexIDs();
+            srcId_ = vertexPair.first;
+            dstId_ = vertexPair.second;
+        }
 
         ~Edge() {}
 
@@ -104,8 +99,8 @@ namespace data_types
         bool directed() { return directed_; }
         bool directed() const { return directed_; }
 
-        T weight() { return weight_; }
-        T weight() const { return weight_; }
+        double weight() { return weight_; }
+        double weight() const { return weight_; }
 
         VertexPair getVertexIDs() { return std::make_pair(srcId_, dstId_); }
         VertexPair getVertexIDs() const { return std::make_pair(srcId_, dstId_); }
@@ -137,7 +132,7 @@ namespace data_types
         EdgeId id_;
         VertexId srcId_;
         VertexId dstId_;
-        T weight_;
+        double weight_;
         bool directed_;
     };
 }

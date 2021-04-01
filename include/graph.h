@@ -6,45 +6,43 @@ namespace graph
 {
     using namespace data_types;
 
-    template <class T = int>
     class Graph
     {
     public:
         Graph() {}
-        Graph(const EdgeList<T> &);
-        Graph(const EdgeMap<T> &);
-        Graph(const Graph<T> &);
-        ~Graph() {}
+        Graph(const EdgeList &);
+        Graph(const EdgeMap &);
+        Graph(const Graph &);
+        virtual ~Graph() {}
 
-        Graph clone();
-        Graph clone() const;
+        virtual Graph clone() { return __clone(); }
+        virtual Graph clone() const { return __clone(); }
 
-        void clear();
+        virtual void clear() { return __clear(); }
 
-        template <class U>
-        friend std::ostream &operator<<(std::ostream &, const Graph<U> &);
+        friend std::ostream &operator<<(std::ostream &, const Graph &);
 
         std::shared_ptr<Vertex> vertex(const VertexId &);
         std::shared_ptr<Vertex> vertex(const VertexId &) const;
 
-        std::shared_ptr<Edge<T>> edge(const EdgeId &);
-        std::shared_ptr<Edge<T>> edge(const EdgeId &) const;
+        std::shared_ptr<Edge> edge(const EdgeId &);
+        std::shared_ptr<Edge> edge(const EdgeId &) const;
 
         VertexMap vertices() { return vertexMap_; }
         VertexMap vertices() const { return vertexMap_; }
 
-        EdgeMap<T> edges() { return edgeMap_; }
-        EdgeMap<T> edges() const { return edgeMap_; }
+        EdgeMap edges() { return edgeMap_; }
+        EdgeMap edges() const { return edgeMap_; }
 
         size_t numVertices() { return vertexMap_.size(); }
         size_t numEdges() { return edgeMap_.size(); }
 
-        std::pair<VertexMap::iterator, bool> addVertex(const VertexId &id) { return __addVertex(id) ;}
-        std::pair<VertexMap::iterator, bool> addVertex(const Vertex &vertex) { return __addVertex(vertex); }
-        std::pair<EdgeId, bool> addEdge(const Edge<T> &edge) { return __addEdge(edge); }
+        virtual std::pair<VertexMap::iterator, bool> addVertex(const VertexId &id) { return __addVertex(id); }
+        virtual std::pair<VertexMap::iterator, bool> addVertex(const Vertex &vertex) { return __addVertex(vertex); }
+        virtual std::pair<EdgeId, bool> addEdge(const Edge &edge) { return __addEdge(edge); }
 
-        bool removeVertex(const VertexId &id) { return __removeVertex(id); }
-        bool removeEdge(const EdgeId &id) { return __removeEdge(id); }
+        virtual bool removeVertex(const VertexId &id) { return __removeVertex(id); }
+        virtual bool removeEdge(const EdgeId &id) { return __removeEdge(id); }
 
         class DFSResult
         {
@@ -132,20 +130,15 @@ namespace graph
         ConnectedComponents findConnectedComponents();
         ConnectedComponents findConnectedComponents() const;
 
-        /*
-         * V: len(vertices) in graph
-         * E: len(edges) in graph
-         * Time: O(V+E)
-         * Topological sort only works on a Directed Acyclic Graph and is used to compute program/build among other applications
-         * Topological sort is also useful for solving the single source shortest path (SSSP) problem on a Directed Acyclic Graph
-        */
-        VertexIdList topologicalSort();
-        VertexIdList topologicalSort() const;
+    protected:
+        void __clear();
 
-    private:
+        Graph __clone();
+        Graph __clone() const;
+
         std::pair<VertexMap::iterator, bool> __addVertex(const VertexId &);
         std::pair<VertexMap::iterator, bool> __addVertex(const Vertex &);
-        std::pair<EdgeId, bool> __addEdge(const Edge<T> &);
+        std::pair<EdgeId, bool> __addEdge(const Edge &);
 
         bool __removeVertex(const VertexId &);
         bool __removeEdge(const EdgeId &);
@@ -153,510 +146,8 @@ namespace graph
         void __dfsRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &, bool postOrder = false);
         void __dfsRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &, bool postOrder = false) const;
 
+    private:
         VertexMap vertexMap_;
-        EdgeMap<T> edgeMap_;
+        EdgeMap edgeMap_;
     };
-
-    template <class T>
-    Graph<T>::Graph(const EdgeList<T> &edgeList)
-    {
-        for (const auto edge : edgeList)
-            addEdge(edge);
-    }
-
-    template <class T>
-    Graph<T>::Graph(const EdgeMap<T> &edgeMap)
-    {
-        for (auto edgePair : edgeMap)
-            addEdge(edgePair.second);
-    }
-
-    template <class T>
-    Graph<T>::Graph(const Graph<T> &graph)
-    {
-        for (auto vertexPair : graph.vertices())
-            addVertex(vertexPair.second);
-
-        for (auto edgePair : graph.edges())
-            addEdge(edgePair.second);
-    }
-
-    template <class T>
-    Graph<T> Graph<T>::clone()
-    {
-        Graph<T> clonedGraph;
-
-        for (auto vertexPair : vertices())
-            clonedGraph.addVertex(vertexPair.second);
-
-        for (auto edgePair : edges())
-            clonedGraph.addEdge(edgePair.second);
-
-        return clonedGraph;
-    }
-
-    template <class T>
-    Graph<T> Graph<T>::clone() const
-    {
-        Graph<T> clonedGraph;
-
-        for (auto vertexPair : vertices())
-            clonedGraph.addVertex(vertexPair.second);
-
-        for (auto edgePair : edges())
-            clonedGraph.addEdge(edgePair.second);
-
-        return clonedGraph;
-    }
-
-    template <class T>
-    void Graph<T>::clear()
-    {
-        edgeMap_.clear();
-        vertexMap_.clear();
-    }
-
-    template <class U>
-    std::ostream &operator<<(std::ostream &output, const Graph<U> &graph)
-    {
-        output << "Graph:\n";
-        output << "\tNum vertices: " << graph.vertices().size() << "\n";
-        output << "\tNum edges   : " << graph.edges().size() << "\n";
-
-        return output;
-    }
-
-    template <class T>
-    std::shared_ptr<Vertex> Graph<T>::vertex(const VertexId &id)
-    {
-        if (vertexMap_.find(id) != vertexMap_.end())
-            return std::make_shared<Vertex>(vertexMap_.at(id));
-
-        return nullptr;
-    }
-
-    template <class T>
-    std::shared_ptr<Vertex> Graph<T>::vertex(const VertexId &id) const
-    {
-        if (vertexMap_.find(id) != vertexMap_.end())
-            return std::make_shared<Vertex>(vertexMap_.at(id));
-
-        return nullptr;
-    }
-
-    template <class T>
-    std::shared_ptr<Edge<T>> Graph<T>::edge(const EdgeId &id)
-    {
-        if (edgeMap_.find(id) != edgeMap_.end())
-            return std::make_shared<Edge<T>>(edgeMap_.at(id));
-
-        return nullptr;
-    }
-
-    template <class T>
-    std::shared_ptr<Edge<T>> Graph<T>::edge(const EdgeId &id) const
-    {
-        if (edgeMap_.find(id) != edgeMap_.end())
-            return std::make_shared<Edge<T>>(edgeMap_.at(id));
-
-        return nullptr;
-    }
-
-    template <class T>
-    std::pair<VertexMap::iterator, bool> Graph<T>::__addVertex(const VertexId &id)
-    {
-        return __addVertex(Vertex(id));
-    }
-
-    template <class T>
-    std::pair<VertexMap::iterator, bool> Graph<T>::__addVertex(const Vertex &vertex)
-    {
-        std::pair<VertexMap::iterator, bool> result = vertexMap_.emplace(vertex.id(), vertex);
-
-        return result;
-    }
-
-    template <class T>
-    std::pair<EdgeId, bool> Graph<T>::__addEdge(const Edge<T> &edge)
-    {
-        if (edgeMap_.find(edge.id()) == edgeMap_.end())
-        {
-            edgeMap_.emplace(edge.id(), edge);
-
-            VertexPair vertexPair = edge.getVertexIDs();
-            VertexMap::iterator srcVertexIt = __addVertex(vertexPair.first).first;
-            VertexMap::iterator dstVertexIt = __addVertex(vertexPair.second).first;
-
-            if (!srcVertexIt->second.addEdgeId(edge.id()))
-                std::cout << "Could not add edge [" << edge.id() << "] to vertex [" << srcVertexIt->first << "]\n";
-
-            if (edge.directed())
-                ;
-            else if (!dstVertexIt->second.addEdgeId(edge.id()))
-                std::cout << "Could not add edge [" << edge.id() << "] to vertex [" << dstVertexIt->first << "]\n";
-
-            return std::make_pair(edge.id(), true);
-        }
-
-        return std::make_pair(edge.id(), false);
-    }
-
-    template <class T>
-    bool Graph<T>::__removeVertex(const VertexId &id)
-    {
-        std::shared_ptr<Vertex> vertexToRemove = vertex(id);
-        if (!vertexToRemove)
-            return false;
-
-        for (const auto edgeId : vertexToRemove->adjList())
-            __removeEdge(edgeId);
-
-        vertexMap_.erase(vertexToRemove->id());
-        return true;
-    }
-
-    template <class T>
-    bool Graph<T>::__removeEdge(const EdgeId &id)
-    {
-        std::shared_ptr<Edge<T>> edgeToRemove = edge(id);
-        if (!edgeToRemove)
-            return false;
-
-        edgeMap_.erase(id);
-
-        VertexPair vertexPair = edgeToRemove->getVertexIDs();
-        std::shared_ptr<Vertex> srcVertex = vertex(vertexPair.first);
-        std::shared_ptr<Vertex> destVertex = vertex(vertexPair.second);
-
-        if (srcVertex)
-            srcVertex->removeEdge(edgeToRemove->id());
-
-        if (destVertex)
-            destVertex->removeEdge(edgeToRemove->id());
-
-        return true;
-    }
-
-    template <class T>
-    typename Graph<T>::DFSResult Graph<T>::dfsTraversal(const VertexId &startId)
-    {
-        DFSResult result;
-        result.traversalOrder_.clear();
-
-        std::map<VertexId, bool> visited;
-        visited.clear();
-        for (auto vertex : vertices())
-            visited[vertex.first] = false;
-
-        __dfsRecursive(startId, visited, result.traversalOrder_);
-
-        return result;
-    }
-
-    template <class T>
-    typename Graph<T>::DFSResult Graph<T>::dfsTraversal(const VertexId &startId) const
-    {
-        DFSResult result;
-        result.traversalOrder_.clear();
-
-        std::map<VertexId, bool> visited;
-        visited.clear();
-        for (auto vertex : vertices())
-            visited[vertex.first] = false;
-
-        __dfsRecursive(startId, visited, result.traversalOrder_);
-
-        return result;
-    }
-
-    template <class T>
-    typename Graph<T>::BFSResult Graph<T>::bfsTraversal(const VertexId &startId)
-    {
-        BFSResult result;
-        result.traversalOrder_.clear();
-
-        VertexIdList vertexQueue;
-
-        std::map<VertexId, bool> visited;
-        visited.clear();
-        result.previousVertexMap_.clear();
-        for (const auto vertexPair : vertices())
-        {
-            visited[vertexPair.first] = false;
-            result.previousVertexMap_[vertexPair.first] = nullptr;
-        }
-
-        visited[startId] = true;
-
-        vertexQueue.push_back(startId);
-        while (!vertexQueue.empty())
-        {
-            VertexId vertexId = vertexQueue.front();
-            vertexQueue.pop_front();
-
-            VertexPtr vertexPtr = vertex(vertexId);
-            if (!vertexPtr)
-                continue;
-
-            result.traversalOrder_.push_back(vertexId);
-
-            for (const auto edgeId : vertexPtr->adjList())
-            {
-                EdgePtr<T> edgePtr = edge(edgeId);
-                if (!edgePtr)
-                    continue;
-
-                std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(vertexId);
-                if (nextVertex.second == false)
-                    continue;
-
-                if (visited[nextVertex.first])
-                    continue;
-
-                vertexQueue.push_back(nextVertex.first);
-                visited[nextVertex.first] = true;
-                result.previousVertexMap_[nextVertex.first] = std::make_shared<VertexId>(vertexId);
-            }
-        }
-
-        return result;
-    }
-
-    template <class T>
-    typename Graph<T>::BFSResult Graph<T>::bfsTraversal(const VertexId &startId) const
-    {
-        BFSResult result;
-        result.traversalOrder_.clear();
-
-        VertexIdList vertexQueue;
-
-        std::map<VertexId, bool> visited;
-        visited.clear();
-        result.previousVertexMap_.clear();
-        for (const auto vertexPair : vertices())
-        {
-            visited[vertexPair.first] = false;
-            result.previousVertexMap_[vertexPair.first] = nullptr;
-        }
-
-        visited[startId] = true;
-
-        vertexQueue.push_back(startId);
-        while (!vertexQueue.empty())
-        {
-            VertexId vertexId = vertexQueue.front();
-            vertexQueue.pop_front();
-
-            VertexPtr vertexPtr = vertex(vertexId);
-            if (!vertexPtr)
-                continue;
-
-            result.traversalOrder_.push_back(vertexId);
-
-            for (const auto edgeId : vertexPtr->adjList())
-            {
-                EdgePtr<T> edgePtr = edge(edgeId);
-                if (!edgePtr)
-                    continue;
-
-                std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(vertexId);
-                if (nextVertex.second == false)
-                    continue;
-
-                if (visited[nextVertex.first])
-                    continue;
-
-                vertexQueue.push_back(nextVertex.first);
-                visited[nextVertex.first] = true;
-                result.previousVertexMap_[nextVertex.first] = std::make_shared<VertexId>(vertexId);
-            }
-        }
-
-        return result;
-    }
-
-    template <class T>
-    typename Graph<T>::ConnectedComponents Graph<T>::findConnectedComponents()
-    {
-        std::map<VertexId, bool> visited;
-        visited.clear();
-        for (auto vertex : vertices())
-            visited[vertex.first] = false;
-
-        VertexIdList traversalOrder;
-
-        ConnectedComponents connectedComponents;
-        for (const auto vertexPair : vertices())
-        {
-            if (!visited[vertexPair.first])
-            {
-                traversalOrder.clear();
-                __dfsRecursive(vertexPair.first, visited, traversalOrder);
-
-                connectedComponents.count_++;
-                connectedComponents.components_.push_back(traversalOrder);
-            }
-        }
-
-        return connectedComponents;
-    }
-
-    template <class T>
-    typename Graph<T>::ConnectedComponents Graph<T>::findConnectedComponents() const
-    {
-        std::map<VertexId, bool> visited;
-        visited.clear();
-        for (auto vertex : vertices())
-            visited[vertex.first] = false;
-
-        VertexIdList traversalOrder;
-
-        ConnectedComponents connectedComponents;
-        for (const auto vertexPair : vertices())
-        {
-            if (!visited[vertexPair.first])
-            {
-                traversalOrder.clear();
-                __dfsRecursive(vertexPair.first, visited, traversalOrder);
-
-                connectedComponents.count_++;
-                connectedComponents.components_.push_back(traversalOrder);
-            }
-        }
-
-        return connectedComponents;
-    }
-
-    template <class T>
-    VertexIdList Graph<T>::topologicalSort()
-    {
-        std::map<VertexId, bool> visited;
-        visited.clear();
-        for (auto vertex : vertices())
-            visited[vertex.first] = false;
-
-        VertexIdList ordering;
-        VertexIdList postTraversal;
-
-        for (const auto vertexPair : vertices())
-        {
-            if (!visited[vertexPair.first])
-            {
-                postTraversal.clear();
-                __dfsRecursive(vertexPair.first, visited, postTraversal, true);
-
-                for (const auto vertexId : postTraversal)
-                    ordering.push_front(vertexId);
-            }
-        }
-
-        return ordering;
-    }
-
-    template <class T>
-    VertexIdList Graph<T>::topologicalSort() const
-    {
-        std::map<VertexId, bool> visited;
-        visited.clear();
-        for (auto vertex : vertices())
-            visited[vertex.first] = false;
-
-        VertexIdList ordering;
-        VertexIdList postTraversal;
-
-        for (const auto vertexPair : vertices())
-        {
-            if (!visited[vertexPair.first])
-            {
-                postTraversal.clear();
-                __dfsRecursive(vertexPair.first, visited, postTraversal, true);
-
-                for (const auto vertexId : postTraversal)
-                    ordering.push_front(vertexId);
-            }
-        }
-
-        return ordering;
-    }
-
-    template <class T>
-    void Graph<T>::__dfsRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder)
-    {
-        if (visited[id])
-            return;
-
-        VertexPtr vertexPtr = vertex(id);
-
-        if (!vertexPtr)
-        {
-            std::cout << "Vertex [" << id << "] cannot be read from graph\n";
-            return;
-        }
-
-        visited[id] = true;
-
-        if (!postOrder)
-            traversalOrder.push_back(id);
-
-        for (auto edgeId : vertexPtr->adjList())
-        {
-            EdgePtr<T> edgePtr = edge(edgeId);
-            if (!edgePtr)
-            {
-                std::cout << "Edge [" << edgeId << "] cannot be read from graph\n";
-                continue;
-            }
-
-            std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(id);
-            if (nextVertex.second == false)
-                continue;
-
-            __dfsRecursive(nextVertex.first, visited, traversalOrder, postOrder);
-        }
-
-        if (postOrder)
-            traversalOrder.push_back(id);
-    }
-
-    template <class T>
-    void Graph<T>::__dfsRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder) const
-    {
-        if (visited[id])
-            return;
-
-        VertexPtr vertexPtr = vertex(id);
-
-        if (!vertexPtr)
-        {
-            std::cout << "Vertex [" << id << "] cannot be read from graph\n";
-            return;
-        }
-
-        visited[id] = true;
-
-        if (!postOrder)
-            traversalOrder.push_back(id);
-
-        for (auto edgeId : vertexPtr->adjList())
-        {
-            EdgePtr<T> edgePtr = edge(edgeId);
-            if (!edgePtr)
-            {
-                std::cout << "Edge [" << edgeId << "] cannot be read from graph\n";
-                continue;
-            }
-
-            std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(id);
-            if (nextVertex.second == false)
-                continue;
-
-            __dfsRecursive(nextVertex.first, visited, traversalOrder, postOrder);
-        }
-
-        if (postOrder)
-            traversalOrder.push_back(id);
-    }
-
-    template class Graph<double>;
-    template class Graph<int>;
 }
