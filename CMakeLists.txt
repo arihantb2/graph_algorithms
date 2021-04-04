@@ -25,6 +25,9 @@ target_link_libraries(top_sort yaml-cpp)
 add_executable(dag_shortest_path src/dag_shortest_path.cpp src/directed_acyclic_graph.cpp src/graph.cpp)
 target_link_libraries(dag_shortest_path yaml-cpp)
 
+add_executable(dijkstra_shortest_path src/dijkstra_shortest_path.cpp src/graph.cpp)
+target_link_libraries(dijkstra_shortest_path yaml-cpp)
+
 add_executable(GraphManipulationTest src/test/unittest_GraphManipulation.cpp src/graph.cpp)
 target_link_libraries(GraphManipulationTest  ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} pthread)
 

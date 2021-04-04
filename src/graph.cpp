@@ -351,6 +351,93 @@ namespace graph
         return connectedComponents;
     }
 
+    Graph::DijkstraResult Graph::dijkstraShortestPath(const VertexId &startId, const VertexId &endId)
+    {
+        Graph::DijkstraResult result;
+        result.distance_ = std::numeric_limits<double>::max();
+        result.pathFound_ = false;
+
+        if (vertexMap_.find(startId) == vertexMap_.end())
+            return result;
+
+        if (vertexMap_.find(endId) == vertexMap_.end())
+            return result;
+
+        std::map<VertexId, bool> visited;
+        std::map<VertexId, double> distance;
+        std::map<VertexId, std::shared_ptr<VertexId>> previous;
+        for (const auto vertexPair : vertexMap_)
+        {
+            visited.insert(std::make_pair(vertexPair.first, false));
+            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::max()));
+            previous.insert(std::make_pair(vertexPair.first, nullptr));
+        }
+
+        distance[startId] = 0.0;
+
+        struct Comparator
+        {
+            bool operator()(const std::pair<VertexId, double> &lhs, const std::pair<VertexId, double> &rhs)
+            {
+                return (lhs.second > rhs.second);
+            }
+        };
+        std::priority_queue<std::pair<VertexId, double>, std::vector<std::pair<VertexId, double>>, Comparator> pQueue;
+        pQueue.push(std::make_pair(startId, 0.0));
+
+        while (!pQueue.empty())
+        {
+            auto vertexPair = pQueue.top();
+            pQueue.pop();
+
+            VertexPtr vertexPtr = vertex(vertexPair.first);
+            if (!vertexPtr)
+                continue;
+
+            visited[vertexPair.first] = true;
+
+            for (const auto edgeId : vertexPtr->adjList())
+            {
+                EdgePtr edgePtr = edge(edgeId);
+                if (!edgePtr)
+                    continue;
+
+                std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(vertexPair.first);
+                if (!nextVertex.second)
+                    continue;
+
+                if (visited[nextVertex.first])
+                    continue;
+
+                if (nextVertex.first == endId)
+                    result.pathFound_ = true;
+
+                double newDistance = distance[vertexPair.first] + edgePtr->weight();
+                if (newDistance < distance[nextVertex.first])
+                {
+                    distance[nextVertex.first] = newDistance;
+                    pQueue.push(std::make_pair(nextVertex.first, newDistance));
+                    previous[nextVertex.first] = std::make_shared<VertexId>(vertexPair.first);
+                }
+            }
+        }
+
+        if (result.pathFound_)
+        {
+            std::shared_ptr<VertexId> idPtr = previous[endId];
+            result.path_.push_front(endId);
+            while(idPtr)
+            {
+                result.path_.push_front(*idPtr);
+                idPtr = previous[*idPtr];
+            }
+
+            result.distance_ = distance[endId];
+        }
+
+        return result;
+    }
+
     void Graph::__dfsRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder)
     {
         if (visited[id])

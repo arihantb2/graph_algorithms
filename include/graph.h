@@ -126,9 +126,27 @@ namespace graph
          * E: len(edges) in graph
          * Time : O(V+E)
          * Space: O()
+         * Finds connected components in the graph and returns the count and list of components
         */
         ConnectedComponents findConnectedComponents();
         ConnectedComponents findConnectedComponents() const;
+
+        class DijkstraResult
+        {
+        public:
+            double distance_;
+            VertexIdList path_;
+            bool pathFound_;
+        };
+
+        /*
+         * V: len(vertices) in graph
+         * E: len(edges) in graph
+         * Time : O(E * log(V))
+         * Space: O()
+         * All edges need to have a non-negative weight which allows this algorithm to act in a greedy manner
+        */
+        DijkstraResult dijkstraShortestPath(const VertexId &, const VertexId &);
 
     protected:
         void __clear();
