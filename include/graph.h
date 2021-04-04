@@ -147,6 +147,8 @@ namespace graph
          * E: len(edges) in graph
          * Time : O(E * log(V))
          * Space: O()
+         * This computes the shortest path between the two input vertex IDs
+         * Note: This is a single source shortest path algorithm (SSSP)
          * This is an implementation of lazy dijkstra which inserts duplicate key-value pairs in the priority queue instead of updating existing key-value pairs
          * The lazy implementation can lead to high space complexity with dense graphs
          * All edges in the graph need to have a non-negative weight which allows this algorithm to act in a greedy manner
@@ -159,6 +161,8 @@ namespace graph
          * E: len(edges) in graph
          * Time : O(EV)
          * Space: O()
+         * This computes the shortest path between the two input vertex IDs
+         * Note: This is a single source shortest path algorithm (SSSP)
          * Bellman-Ford algorithm is useful when graph has negative edge weights and it detects negative cycles
          * However, it has a worse time complexity than Dijkstra's algorithm, O(EV) as compared to O(E * log(V))
          * This algorithm treats each edge as a directed edge

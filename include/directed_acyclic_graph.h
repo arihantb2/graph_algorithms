@@ -31,6 +31,7 @@ namespace graph
          * Time : O()
          * Space: O()
          * Computes the shortest path from given vertex to all other reachable vertices in the DAG
+         * Note: This is a single source shortest path algorithm (SSSP)
         */
         std::map<data_types::VertexId, double> shortestPathFrom(const data_types::VertexId &startId);
         std::map<data_types::VertexId, double> shortestPathFrom(const data_types::VertexId &startId) const;
