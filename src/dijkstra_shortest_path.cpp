@@ -14,7 +14,7 @@ int main(int argc, char const *argv[])
     graph::Graph graph = yaml_loader::loadGraphFromFile(std::string(argv[1]));
     std::cout << graph << std::endl;
 
-    graph::Graph::DijkstraResult result = graph.dijkstraShortestPath(graph.vertices().cbegin()->first, graph.vertices().crbegin()->first);
+    graph::Graph::ShortestPathResult result = graph.dijkstraShortestPath(graph.vertices().cbegin()->first, graph.vertices().crbegin()->first);
     if (result.pathFound_)
     {
         std::cout << "Path found!!\n";

@@ -35,7 +35,10 @@ namespace graph
         EdgeMap edges() const { return edgeMap_; }
 
         size_t numVertices() { return vertexMap_.size(); }
+        size_t numVertices() const { return vertexMap_.size(); }
+
         size_t numEdges() { return edgeMap_.size(); }
+        size_t numEdges() const { return edgeMap_.size(); }
 
         virtual std::pair<VertexMap::iterator, bool> addVertex(const VertexId &id) { return __addVertex(id); }
         virtual std::pair<VertexMap::iterator, bool> addVertex(const Vertex &vertex) { return __addVertex(vertex); }
@@ -131,7 +134,7 @@ namespace graph
         ConnectedComponents findConnectedComponents();
         ConnectedComponents findConnectedComponents() const;
 
-        class DijkstraResult
+        class ShortestPathResult
         {
         public:
             double distance_;
@@ -148,7 +151,20 @@ namespace graph
          * The lazy implementation can lead to high space complexity with dense graphs
          * All edges in the graph need to have a non-negative weight which allows this algorithm to act in a greedy manner
         */
-        DijkstraResult dijkstraShortestPath(const VertexId &, const VertexId &);
+        ShortestPathResult dijkstraShortestPath(const VertexId &, const VertexId &);
+        ShortestPathResult dijkstraShortestPath(const VertexId &, const VertexId &) const;
+
+        /*
+         * V: len(vertices) in graph
+         * E: len(edges) in graph
+         * Time : O(EV)
+         * Space: O()
+         * Bellman-Ford algorithm is useful when graph has negative edge weights and it detects negative cycles
+         * However, it has a worse time complexity than Dijkstra's algorithm, O(EV) as compared to O(E * log(V))
+         * This algorithm treats each edge as a directed edge
+        */
+        ShortestPathResult bellmanFordShortestPath(const VertexId &, const VertexId &);
+        ShortestPathResult bellmanFordShortestPath(const VertexId &, const VertexId &) const;
 
     protected:
         void __clear();

@@ -351,9 +351,9 @@ namespace graph
         return connectedComponents;
     }
 
-    Graph::DijkstraResult Graph::dijkstraShortestPath(const VertexId &startId, const VertexId &endId)
+    Graph::ShortestPathResult Graph::dijkstraShortestPath(const VertexId &startId, const VertexId &endId)
     {
-        Graph::DijkstraResult result;
+        Graph::ShortestPathResult result;
         result.distance_ = std::numeric_limits<double>::max();
         result.pathFound_ = false;
 
@@ -432,7 +432,7 @@ namespace graph
         {
             std::shared_ptr<VertexId> idPtr = previous[endId];
             result.path_.push_front(endId);
-            while(idPtr)
+            while (idPtr)
             {
                 result.path_.push_front(*idPtr);
                 idPtr = previous[*idPtr];
@@ -441,6 +441,189 @@ namespace graph
             result.distance_ = distance[endId];
         }
 
+        return result;
+    }
+
+    Graph::ShortestPathResult Graph::dijkstraShortestPath(const VertexId &startId, const VertexId &endId) const
+    {
+        Graph::ShortestPathResult result;
+        result.distance_ = std::numeric_limits<double>::max();
+        result.pathFound_ = false;
+
+        if (vertexMap_.find(startId) == vertexMap_.end())
+            return result;
+
+        if (vertexMap_.find(endId) == vertexMap_.end())
+            return result;
+
+        std::map<VertexId, bool> visited;
+        std::map<VertexId, double> distance;
+        std::map<VertexId, std::shared_ptr<VertexId>> previous;
+        for (const auto vertexPair : vertexMap_)
+        {
+            visited.insert(std::make_pair(vertexPair.first, false));
+            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::max()));
+            previous.insert(std::make_pair(vertexPair.first, nullptr));
+        }
+
+        distance[startId] = 0.0;
+
+        struct Comparator
+        {
+            bool operator()(const std::pair<VertexId, double> &lhs, const std::pair<VertexId, double> &rhs)
+            {
+                return (lhs.second > rhs.second);
+            }
+        };
+        std::priority_queue<std::pair<VertexId, double>, std::vector<std::pair<VertexId, double>>, Comparator> pQueue;
+        pQueue.push(std::make_pair(startId, 0.0));
+
+        while (!pQueue.empty())
+        {
+            auto vertexPair = pQueue.top();
+            pQueue.pop();
+
+            VertexPtr vertexPtr = vertex(vertexPair.first);
+            if (!vertexPtr)
+                continue;
+
+            visited[vertexPair.first] = true;
+            if (distance[vertexPair.first] < vertexPair.second)
+                continue;
+
+            for (const auto edgeId : vertexPtr->adjList())
+            {
+                EdgePtr edgePtr = edge(edgeId);
+                if (!edgePtr)
+                    continue;
+
+                std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(vertexPair.first);
+                if (!nextVertex.second)
+                    continue;
+
+                if (visited[nextVertex.first])
+                    continue;
+
+                double newDistance = distance[vertexPair.first] + edgePtr->weight();
+                if (newDistance < distance[nextVertex.first])
+                {
+                    // Inserting duplicate key-value pair, O(log(n)), is faster than searching for existing key, O(n), and updating its value
+                    pQueue.push(std::make_pair(nextVertex.first, newDistance));
+                    distance[nextVertex.first] = newDistance;
+                    previous[nextVertex.first] = std::make_shared<VertexId>(vertexPair.first);
+                }
+
+                if (nextVertex.first == endId)
+                {
+                    result.pathFound_ = true;
+                    break;
+                }
+            }
+        }
+
+        if (result.pathFound_)
+        {
+            std::shared_ptr<VertexId> idPtr = previous[endId];
+            result.path_.push_front(endId);
+            while (idPtr)
+            {
+                result.path_.push_front(*idPtr);
+                idPtr = previous[*idPtr];
+            }
+
+            result.distance_ = distance[endId];
+        }
+
+        return result;
+    }
+
+    Graph::ShortestPathResult Graph::bellmanFordShortestPath(const VertexId &startId, const VertexId &endId)
+    {
+        std::cout << "\033[1;31m[WARNING]\033[0m: Bellman Ford Shortest Path treats all edges in graph as directed edges\n";
+
+        Graph::ShortestPathResult result;
+        result.distance_ = std::numeric_limits<double>::max();
+        result.pathFound_ = false;
+
+        if (vertexMap_.find(startId) == vertexMap_.end())
+            return result;
+
+        if (vertexMap_.find(endId) == vertexMap_.end())
+            return result;
+
+        std::map<VertexId, double> distance;
+        for (const auto vertexPair : vertexMap_)
+            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::max()));
+
+        distance[startId] = 0.0;
+
+        EdgeId edgeCount = edgeMap_.size();
+        for (size_t i = 0; i < edgeCount - 1; i++)
+        {
+            for (const auto edge : edgeMap_)
+            {
+                VertexPair vertexPair = edge.second.getVertexIDs();
+                if (distance[vertexPair.first] + edge.second.weight() < distance[vertexPair.second])
+                    distance[vertexPair.second] = distance[vertexPair.first] + edge.second.weight();
+            }
+        }
+
+        for (size_t i = 0; i < edgeCount - 1; i++)
+        {
+            for (const auto edge : edgeMap_)
+            {
+                VertexPair vertexPair = edge.second.getVertexIDs();
+                if (distance[vertexPair.first] + edge.second.weight() < distance[vertexPair.second])
+                    distance[vertexPair.second] = std::numeric_limits<double>::lowest();
+            }
+        }
+
+        result.distance_ = distance[endId];
+        return result;
+    }
+
+    Graph::ShortestPathResult Graph::bellmanFordShortestPath(const VertexId &startId, const VertexId &endId) const
+    {
+        std::cout << "\033[1;31m[WARNING]\033[0m: Bellman Ford Shortest Path treats all edges in graph as directed edges\n";
+
+        Graph::ShortestPathResult result;
+        result.distance_ = std::numeric_limits<double>::max();
+        result.pathFound_ = false;
+
+        if (vertexMap_.find(startId) == vertexMap_.end())
+            return result;
+
+        if (vertexMap_.find(endId) == vertexMap_.end())
+            return result;
+
+        std::map<VertexId, double> distance;
+        for (const auto vertexPair : vertexMap_)
+            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::max()));
+
+        distance[startId] = 0.0;
+
+        EdgeId edgeCount = edgeMap_.size();
+        for (size_t i = 0; i < edgeCount - 1; i++)
+        {
+            for (const auto edge : edgeMap_)
+            {
+                VertexPair vertexPair = edge.second.getVertexIDs();
+                if (distance[vertexPair.first] + edge.second.weight() < distance[vertexPair.second])
+                    distance[vertexPair.second] = distance[vertexPair.first] + edge.second.weight();
+            }
+        }
+
+        for (size_t i = 0; i < edgeCount - 1; i++)
+        {
+            for (const auto edge : edgeMap_)
+            {
+                VertexPair vertexPair = edge.second.getVertexIDs();
+                if (distance[vertexPair.first] + edge.second.weight() < distance[vertexPair.second])
+                    distance[vertexPair.second] = std::numeric_limits<double>::lowest();
+            }
+        }
+
+        result.distance_ = distance[endId];
         return result;
     }
 
