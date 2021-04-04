@@ -395,6 +395,8 @@ namespace graph
                 continue;
 
             visited[vertexPair.first] = true;
+            if (distance[vertexPair.first] < vertexPair.second)
+                continue;
 
             for (const auto edgeId : vertexPtr->adjList())
             {
@@ -415,8 +417,9 @@ namespace graph
                 double newDistance = distance[vertexPair.first] + edgePtr->weight();
                 if (newDistance < distance[nextVertex.first])
                 {
-                    distance[nextVertex.first] = newDistance;
+                    // Inserting duplicate key-value pair, O(log(n)), is faster than searching for existing key, O(n), and updating its value
                     pQueue.push(std::make_pair(nextVertex.first, newDistance));
+                    distance[nextVertex.first] = newDistance;
                     previous[nextVertex.first] = std::make_shared<VertexId>(vertexPair.first);
                 }
             }
