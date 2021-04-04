@@ -145,6 +145,7 @@ namespace graph
          * Time : O(E * log(V))
          * Space: O()
          * This is an implementation of lazy dijkstra which inserts duplicate key-value pairs in the priority queue instead of updating existing key-value pairs
+         * The lazy implementation can lead to high space complexity with dense graphs
          * All edges in the graph need to have a non-negative weight which allows this algorithm to act in a greedy manner
         */
         DijkstraResult dijkstraShortestPath(const VertexId &, const VertexId &);

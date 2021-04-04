@@ -411,9 +411,6 @@ namespace graph
                 if (visited[nextVertex.first])
                     continue;
 
-                if (nextVertex.first == endId)
-                    result.pathFound_ = true;
-
                 double newDistance = distance[vertexPair.first] + edgePtr->weight();
                 if (newDistance < distance[nextVertex.first])
                 {
@@ -421,6 +418,12 @@ namespace graph
                     pQueue.push(std::make_pair(nextVertex.first, newDistance));
                     distance[nextVertex.first] = newDistance;
                     previous[nextVertex.first] = std::make_shared<VertexId>(vertexPair.first);
+                }
+
+                if (nextVertex.first == endId)
+                {
+                    result.pathFound_ = true;
+                    break;
                 }
             }
         }
