@@ -14,8 +14,11 @@ int main(int argc, char const *argv[])
     graph::Graph graph = yaml_loader::loadGraphFromFile(std::string(argv[1]));
     std::cout << graph << std::endl;
 
-    graph::Graph::ShortestPathResult result = graph.bellmanFordShortestPath(graph.vertices().cbegin()->first, graph.vertices().crbegin()->first);
-    std::cout << "Distance from " << graph.vertices().cbegin()->first << " --> " << graph.vertices().crbegin()->first << ": " << result.distance_ << "\n";
+    std::map<data_types::VertexId, double> result = graph.bellmanFordShortestPath(graph.vertices().cbegin()->first);
+    std::cout << "Distances from start vertex: [" << graph.vertices().begin()->first << "] is: [\n";
+    for (const auto distancePair : result)
+        std::cout << "\t 0 --> " << distancePair.first << ": " << distancePair.second << "\n";
+    std::cout << "]\n";
 
     return 0;
 }

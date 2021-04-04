@@ -354,7 +354,7 @@ namespace graph
     Graph::ShortestPathResult Graph::dijkstraShortestPath(const VertexId &startId, const VertexId &endId)
     {
         Graph::ShortestPathResult result;
-        result.distance_ = std::numeric_limits<double>::max();
+        result.distance_ = std::numeric_limits<double>::infinity();
         result.pathFound_ = false;
 
         if (vertexMap_.find(startId) == vertexMap_.end())
@@ -369,7 +369,7 @@ namespace graph
         for (const auto vertexPair : vertexMap_)
         {
             visited.insert(std::make_pair(vertexPair.first, false));
-            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::max()));
+            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::infinity()));
             previous.insert(std::make_pair(vertexPair.first, nullptr));
         }
 
@@ -447,7 +447,7 @@ namespace graph
     Graph::ShortestPathResult Graph::dijkstraShortestPath(const VertexId &startId, const VertexId &endId) const
     {
         Graph::ShortestPathResult result;
-        result.distance_ = std::numeric_limits<double>::max();
+        result.distance_ = std::numeric_limits<double>::infinity();
         result.pathFound_ = false;
 
         if (vertexMap_.find(startId) == vertexMap_.end())
@@ -462,7 +462,7 @@ namespace graph
         for (const auto vertexPair : vertexMap_)
         {
             visited.insert(std::make_pair(vertexPair.first, false));
-            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::max()));
+            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::infinity()));
             previous.insert(std::make_pair(vertexPair.first, nullptr));
         }
 
@@ -537,25 +537,18 @@ namespace graph
         return result;
     }
 
-    Graph::ShortestPathResult Graph::bellmanFordShortestPath(const VertexId &startId, const VertexId &endId)
+    std::map<VertexId, double> Graph::bellmanFordShortestPath(const VertexId &startId)
     {
         std::cout << "\033[1;31m[WARNING]\033[0m: Bellman Ford Shortest Path treats all edges in graph as directed edges\n";
 
-        Graph::ShortestPathResult result;
-        result.distance_ = std::numeric_limits<double>::max();
-        result.pathFound_ = false;
-
-        if (vertexMap_.find(startId) == vertexMap_.end())
-            return result;
-
-        if (vertexMap_.find(endId) == vertexMap_.end())
-            return result;
-
         std::map<VertexId, double> distance;
         for (const auto vertexPair : vertexMap_)
-            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::max()));
+            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::infinity()));
 
         distance[startId] = 0.0;
+
+        if (vertexMap_.find(startId) == vertexMap_.end())
+            return distance;
 
         EdgeId edgeCount = edgeMap_.size();
         for (size_t i = 0; i < edgeCount - 1; i++)
@@ -574,33 +567,25 @@ namespace graph
             {
                 VertexPair vertexPair = edge.second.getVertexIDs();
                 if (distance[vertexPair.first] + edge.second.weight() < distance[vertexPair.second])
-                    distance[vertexPair.second] = std::numeric_limits<double>::lowest();
+                    distance[vertexPair.second] = -std::numeric_limits<double>::infinity();
             }
         }
 
-        result.distance_ = distance[endId];
-        return result;
+        return distance;
     }
 
-    Graph::ShortestPathResult Graph::bellmanFordShortestPath(const VertexId &startId, const VertexId &endId) const
+    std::map<VertexId, double> Graph::bellmanFordShortestPath(const VertexId &startId) const
     {
         std::cout << "\033[1;31m[WARNING]\033[0m: Bellman Ford Shortest Path treats all edges in graph as directed edges\n";
 
-        Graph::ShortestPathResult result;
-        result.distance_ = std::numeric_limits<double>::max();
-        result.pathFound_ = false;
-
-        if (vertexMap_.find(startId) == vertexMap_.end())
-            return result;
-
-        if (vertexMap_.find(endId) == vertexMap_.end())
-            return result;
-
         std::map<VertexId, double> distance;
         for (const auto vertexPair : vertexMap_)
-            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::max()));
+            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::infinity()));
 
         distance[startId] = 0.0;
+
+        if (vertexMap_.find(startId) == vertexMap_.end())
+            return distance;
 
         EdgeId edgeCount = edgeMap_.size();
         for (size_t i = 0; i < edgeCount - 1; i++)
@@ -619,12 +604,11 @@ namespace graph
             {
                 VertexPair vertexPair = edge.second.getVertexIDs();
                 if (distance[vertexPair.first] + edge.second.weight() < distance[vertexPair.second])
-                    distance[vertexPair.second] = std::numeric_limits<double>::lowest();
+                    distance[vertexPair.second] = -std::numeric_limits<double>::infinity();
             }
         }
 
-        result.distance_ = distance[endId];
-        return result;
+        return distance;
     }
 
     void Graph::__dfsRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder)

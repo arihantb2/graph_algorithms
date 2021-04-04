@@ -67,7 +67,7 @@ namespace graph
          * * Find bridges and articulation points
          * * Find augmenting paths in a flow network
          * * Generate mazes
-        */
+         */
         DFSResult dfsTraversal(const VertexId &);
 
         /*
@@ -84,7 +84,7 @@ namespace graph
          * * Find bridges and articulation points
          * * Find augmenting paths in a flow network
          * * Generate mazes
-        */
+         */
         DFSResult dfsTraversal(const VertexId &) const;
 
         class BFSResult
@@ -100,7 +100,7 @@ namespace graph
          * Time : O(V+E)
          * Space: O(V)
          * BFS algorithm is particularly useful for finding shortest path on unweighted graphs
-        */
+         */
         BFSResult bfsTraversal(const VertexId &);
 
         /*
@@ -109,7 +109,7 @@ namespace graph
          * Time : O(V+E)
          * Space: O(V)
          * BFS algorithm is particularly useful for finding shortest path on unweighted graphs
-        */
+         */
         BFSResult bfsTraversal(const VertexId &) const;
 
         class ConnectedComponents
@@ -130,7 +130,7 @@ namespace graph
          * Time : O(V+E)
          * Space: O()
          * Finds connected components in the graph and returns the count and list of components
-        */
+         */
         ConnectedComponents findConnectedComponents();
         ConnectedComponents findConnectedComponents() const;
 
@@ -152,7 +152,7 @@ namespace graph
          * This is an implementation of lazy dijkstra which inserts duplicate key-value pairs in the priority queue instead of updating existing key-value pairs
          * The lazy implementation can lead to high space complexity with dense graphs
          * All edges in the graph need to have a non-negative weight which allows this algorithm to act in a greedy manner
-        */
+         */
         ShortestPathResult dijkstraShortestPath(const VertexId &, const VertexId &);
         ShortestPathResult dijkstraShortestPath(const VertexId &, const VertexId &) const;
 
@@ -166,9 +166,21 @@ namespace graph
          * Bellman-Ford algorithm is useful when graph has negative edge weights and it detects negative cycles
          * However, it has a worse time complexity than Dijkstra's algorithm, O(EV) as compared to O(E * log(V))
          * This algorithm treats each edge as a directed edge
-        */
-        ShortestPathResult bellmanFordShortestPath(const VertexId &, const VertexId &);
-        ShortestPathResult bellmanFordShortestPath(const VertexId &, const VertexId &) const;
+         */
+        std::map<VertexId, double> bellmanFordShortestPath(const VertexId &);
+        std::map<VertexId, double> bellmanFordShortestPath(const VertexId &) const;
+
+        /*
+         * V: len(vertices) in graph
+         * E: len(edges) in graph
+         * Time : O(V^3)
+         * Space: O()
+         * This computes the shortest path between the two input vertex IDs
+         * Note: This is an all-pairs shortest path algorithm (APSP)
+         * This algorithm is ideal for small graphs with no more than a couple of hundred vertices and it detects negative cycles
+         */
+        void floydWarshallShortestPath();
+        void floydWarshallShortestPath() const;
 
     protected:
         void __clear();

@@ -1,0 +1,16 @@
+graph:
+  vertices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  edges:
+    - { src: 0, dst: 1, wt: 5.0, dir: True }
+    - { src: 1, dst: 2, wt: 20.0, dir: True }
+    - { src: 1, dst: 5, wt: 30.0, dir: True }
+    - { src: 1, dst: 6, wt: 60.0, dir: True }
+    - { src: 2, dst: 3, wt: 10.0, dir: True }
+    - { src: 2, dst: 4, wt: 75.0, dir: True }
+    - { src: 3, dst: 2, wt: -15.0, dir: True }
+    - { src: 4, dst: 9, wt: 100.0, dir: True }
+    - { src: 5, dst: 4, wt: 25.0, dir: True }
+    - { src: 5, dst: 6, wt: 5.0, dir: True }
+    - { src: 5, dst: 8, wt: 50.0, dir: True }
+    - { src: 6, dst: 7, wt: -50.0, dir: True }
+    - { src: 7, dst: 8, wt: -10.0, dir: True }

@@ -57,7 +57,7 @@ namespace graph
     {
         std::map<data_types::VertexId, double> distanceFromStart;
         for (const auto vertexPair : vertices())
-            distanceFromStart.emplace(vertexPair.first, std::numeric_limits<double>::max());
+            distanceFromStart.emplace(vertexPair.first, std::numeric_limits<double>::infinity());
 
         if (distanceFromStart.find(startId) == distanceFromStart.end())
         {
@@ -97,7 +97,7 @@ namespace graph
     {
         std::map<data_types::VertexId, double> distanceFromStart;
         for (const auto vertexPair : vertices())
-            distanceFromStart.emplace(vertexPair.first, std::numeric_limits<double>::max());
+            distanceFromStart.emplace(vertexPair.first, std::numeric_limits<double>::infinity());
 
         if (distanceFromStart.find(startId) == distanceFromStart.end())
         {
