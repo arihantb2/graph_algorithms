@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bits/stdc++.h>
+#include <eigen3/Eigen/Dense>
 
 namespace data_types
 {
@@ -9,6 +10,8 @@ namespace data_types
 
     class Vertex;
     class Edge;
+
+    using Weight = double;
 
     using VertexPtr = std::shared_ptr<Vertex>;
     using EdgePtr = std::shared_ptr<Edge>;
@@ -22,6 +25,12 @@ namespace data_types
 
     using EdgeList = std::deque<Edge>;
     using EdgeMap = std::map<EdgeId, Edge>;
+
+    template <class T = Weight>
+    using VertexIdMap = std::map<VertexId, T>;
+
+    template <class T = Weight>
+    using AdjMatrix = std::map<VertexId, std::map<VertexId, T>>;
 
     class Vertex
     {
@@ -72,12 +81,12 @@ namespace data_types
     {
     public:
         Edge() = delete;
-        Edge(VertexId srcId, VertexId dstId, double wt = 1.0, bool directed = false) : id_(idCounter_++),
+        Edge(VertexId srcId, VertexId dstId, Weight wt = 1.0, bool directed = false) : id_(idCounter_++),
                                                                                        srcId_(srcId),
                                                                                        dstId_(dstId),
                                                                                        weight_(wt),
                                                                                        directed_(directed) {}
-        Edge(const Vertex &src, const Vertex &dest, double wt = 1.0, bool directed = false) : id_(idCounter_++),
+        Edge(const Vertex &src, const Vertex &dest, Weight wt = 1.0, bool directed = false) : id_(idCounter_++),
                                                                                               srcId_(src.id()),
                                                                                               dstId_(dest.id()),
                                                                                               weight_(wt),
@@ -99,8 +108,8 @@ namespace data_types
         bool directed() { return directed_; }
         bool directed() const { return directed_; }
 
-        double weight() { return weight_; }
-        double weight() const { return weight_; }
+        Weight weight() { return weight_; }
+        Weight weight() const { return weight_; }
 
         VertexPair getVertexIDs() { return std::make_pair(srcId_, dstId_); }
         VertexPair getVertexIDs() const { return std::make_pair(srcId_, dstId_); }
@@ -132,7 +141,7 @@ namespace data_types
         EdgeId id_;
         VertexId srcId_;
         VertexId dstId_;
-        double weight_;
+        Weight weight_;
         bool directed_;
     };
 }

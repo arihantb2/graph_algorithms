@@ -11,12 +11,12 @@ data_types::VertexId data_types::Vertex::idCounter_ = 0;
 
 int main(int argc, char const *argv[])
 {
-    assert((argc == 2) && "Exactly one argument required after executable name. Usage: <dfs-executable> <yaml-config-file-path>");
+    assert((argc == 2) && "Exactly one argument required after executable name. Usage: <dag-shortest-path-executable> <yaml-config-file-path>");
 
     graph::DAG graph = yaml_loader::loadDAGFromFile(std::string(argv[1]));
     std::cout << graph << std::endl;
 
-    auto distances = graph.shortestPathFrom(graph.vertices().begin()->first);
+    data_types::VertexIdMap<data_types::Weight> distances = graph.shortestPathFrom(graph.vertices().begin()->first);
 
     std::cout << "Distances from start vertex: [" << graph.vertices().begin()->first << "] is: [\n";
     for (const auto distancePair : distances)

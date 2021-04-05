@@ -91,7 +91,7 @@ namespace graph
         {
         public:
             VertexIdList traversalOrder_;
-            std::map<VertexId, std::shared_ptr<VertexId>> previousVertexMap_;
+            VertexIdMap<std::shared_ptr<VertexId>> previousVertexMap_;
         };
 
         /*
@@ -137,7 +137,7 @@ namespace graph
         class ShortestPathResult
         {
         public:
-            double distance_;
+            Weight distance_;
             VertexIdList path_;
             bool pathFound_;
         };
@@ -156,32 +156,6 @@ namespace graph
         ShortestPathResult dijkstraShortestPath(const VertexId &, const VertexId &);
         ShortestPathResult dijkstraShortestPath(const VertexId &, const VertexId &) const;
 
-        /*
-         * V: len(vertices) in graph
-         * E: len(edges) in graph
-         * Time : O(EV)
-         * Space: O()
-         * This computes the shortest path between the two input vertex IDs
-         * Note: This is a single source shortest path algorithm (SSSP)
-         * Bellman-Ford algorithm is useful when graph has negative edge weights and it detects negative cycles
-         * However, it has a worse time complexity than Dijkstra's algorithm, O(EV) as compared to O(E * log(V))
-         * This algorithm treats each edge as a directed edge
-         */
-        std::map<VertexId, double> bellmanFordShortestPath(const VertexId &);
-        std::map<VertexId, double> bellmanFordShortestPath(const VertexId &) const;
-
-        /*
-         * V: len(vertices) in graph
-         * E: len(edges) in graph
-         * Time : O(V^3)
-         * Space: O()
-         * This computes the shortest path between the two input vertex IDs
-         * Note: This is an all-pairs shortest path algorithm (APSP)
-         * This algorithm is ideal for small graphs with no more than a couple of hundred vertices and it detects negative cycles
-         */
-        void floydWarshallShortestPath();
-        void floydWarshallShortestPath() const;
-
     protected:
         void __clear();
 
@@ -195,8 +169,8 @@ namespace graph
         bool __removeVertex(const VertexId &);
         bool __removeEdge(const EdgeId &);
 
-        void __dfsRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &, bool postOrder = false);
-        void __dfsRecursive(const VertexId &, std::map<VertexId, bool> &, VertexIdList &, bool postOrder = false) const;
+        void __dfsRecursive(const VertexId &, VertexIdMap<bool> &, VertexIdList &, bool postOrder = false);
+        void __dfsRecursive(const VertexId &, VertexIdMap<bool> &, VertexIdList &, bool postOrder = false) const;
 
     private:
         VertexMap vertexMap_;

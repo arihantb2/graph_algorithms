@@ -5,7 +5,7 @@ namespace graph
 
     VertexIdList DirectedAcyclicGraph::topologicalSort()
     {
-        std::map<VertexId, bool> visited;
+        VertexIdMap<bool> visited;
         visited.clear();
         for (auto vertex : vertices())
             visited[vertex.first] = false;
@@ -30,7 +30,7 @@ namespace graph
 
     VertexIdList DirectedAcyclicGraph::topologicalSort() const
     {
-        std::map<VertexId, bool> visited;
+        VertexIdMap<bool> visited;
         visited.clear();
         for (auto vertex : vertices())
             visited[vertex.first] = false;
@@ -53,11 +53,11 @@ namespace graph
         return ordering;
     }
 
-    std::map<data_types::VertexId, double> DirectedAcyclicGraph::shortestPathFrom(const data_types::VertexId &startId)
+    VertexIdMap<Weight> DirectedAcyclicGraph::shortestPathFrom(const data_types::VertexId &startId)
     {
-        std::map<data_types::VertexId, double> distanceFromStart;
+        VertexIdMap<Weight> distanceFromStart;
         for (const auto vertexPair : vertices())
-            distanceFromStart.emplace(vertexPair.first, std::numeric_limits<double>::infinity());
+            distanceFromStart.emplace(vertexPair.first, std::numeric_limits<Weight>::infinity());
 
         if (distanceFromStart.find(startId) == distanceFromStart.end())
         {
@@ -93,11 +93,11 @@ namespace graph
         return distanceFromStart;
     }
 
-    std::map<data_types::VertexId, double> DirectedAcyclicGraph::shortestPathFrom(const data_types::VertexId &startId) const
+    VertexIdMap<Weight> DirectedAcyclicGraph::shortestPathFrom(const data_types::VertexId &startId) const
     {
-        std::map<data_types::VertexId, double> distanceFromStart;
+        VertexIdMap<Weight> distanceFromStart;
         for (const auto vertexPair : vertices())
-            distanceFromStart.emplace(vertexPair.first, std::numeric_limits<double>::infinity());
+            distanceFromStart.emplace(vertexPair.first, std::numeric_limits<Weight>::infinity());
 
         if (distanceFromStart.find(startId) == distanceFromStart.end())
         {

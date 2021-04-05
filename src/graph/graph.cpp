@@ -172,7 +172,7 @@ namespace graph
         DFSResult result;
         result.traversalOrder_.clear();
 
-        std::map<VertexId, bool> visited;
+        VertexIdMap<bool> visited;
         visited.clear();
         for (auto vertex : vertices())
             visited[vertex.first] = false;
@@ -187,7 +187,7 @@ namespace graph
         DFSResult result;
         result.traversalOrder_.clear();
 
-        std::map<VertexId, bool> visited;
+        VertexIdMap<bool> visited;
         visited.clear();
         for (auto vertex : vertices())
             visited[vertex.first] = false;
@@ -204,7 +204,7 @@ namespace graph
 
         VertexIdList vertexQueue;
 
-        std::map<VertexId, bool> visited;
+        VertexIdMap<bool> visited;
         visited.clear();
         result.previousVertexMap_.clear();
         for (const auto vertexPair : vertices())
@@ -256,7 +256,7 @@ namespace graph
 
         VertexIdList vertexQueue;
 
-        std::map<VertexId, bool> visited;
+        VertexIdMap<bool> visited;
         visited.clear();
         result.previousVertexMap_.clear();
         for (const auto vertexPair : vertices())
@@ -303,7 +303,7 @@ namespace graph
 
     typename Graph::ConnectedComponents Graph::findConnectedComponents()
     {
-        std::map<VertexId, bool> visited;
+        VertexIdMap<bool> visited;
         visited.clear();
         for (auto vertex : vertices())
             visited[vertex.first] = false;
@@ -328,7 +328,7 @@ namespace graph
 
     typename Graph::ConnectedComponents Graph::findConnectedComponents() const
     {
-        std::map<VertexId, bool> visited;
+        VertexIdMap<bool> visited;
         visited.clear();
         for (auto vertex : vertices())
             visited[vertex.first] = false;
@@ -363,9 +363,9 @@ namespace graph
         if (vertexMap_.find(endId) == vertexMap_.end())
             return result;
 
-        std::map<VertexId, bool> visited;
-        std::map<VertexId, double> distance;
-        std::map<VertexId, std::shared_ptr<VertexId>> previous;
+        VertexIdMap<bool> visited;
+        VertexIdMap<Weight> distance;
+        VertexIdMap<std::shared_ptr<VertexId>> previous;
         for (const auto vertexPair : vertexMap_)
         {
             visited.insert(std::make_pair(vertexPair.first, false));
@@ -456,9 +456,9 @@ namespace graph
         if (vertexMap_.find(endId) == vertexMap_.end())
             return result;
 
-        std::map<VertexId, bool> visited;
-        std::map<VertexId, double> distance;
-        std::map<VertexId, std::shared_ptr<VertexId>> previous;
+        VertexIdMap<bool> visited;
+        VertexIdMap<Weight> distance;
+        VertexIdMap<std::shared_ptr<VertexId>> previous;
         for (const auto vertexPair : vertexMap_)
         {
             visited.insert(std::make_pair(vertexPair.first, false));
@@ -537,81 +537,7 @@ namespace graph
         return result;
     }
 
-    std::map<VertexId, double> Graph::bellmanFordShortestPath(const VertexId &startId)
-    {
-        std::cout << "\033[1;31m[WARNING]\033[0m: Bellman Ford Shortest Path treats all edges in graph as directed edges\n";
-
-        std::map<VertexId, double> distance;
-        for (const auto vertexPair : vertexMap_)
-            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::infinity()));
-
-        distance[startId] = 0.0;
-
-        if (vertexMap_.find(startId) == vertexMap_.end())
-            return distance;
-
-        EdgeId edgeCount = edgeMap_.size();
-        for (size_t i = 0; i < edgeCount - 1; i++)
-        {
-            for (const auto edge : edgeMap_)
-            {
-                VertexPair vertexPair = edge.second.getVertexIDs();
-                if (distance[vertexPair.first] + edge.second.weight() < distance[vertexPair.second])
-                    distance[vertexPair.second] = distance[vertexPair.first] + edge.second.weight();
-            }
-        }
-
-        for (size_t i = 0; i < edgeCount - 1; i++)
-        {
-            for (const auto edge : edgeMap_)
-            {
-                VertexPair vertexPair = edge.second.getVertexIDs();
-                if (distance[vertexPair.first] + edge.second.weight() < distance[vertexPair.second])
-                    distance[vertexPair.second] = -std::numeric_limits<double>::infinity();
-            }
-        }
-
-        return distance;
-    }
-
-    std::map<VertexId, double> Graph::bellmanFordShortestPath(const VertexId &startId) const
-    {
-        std::cout << "\033[1;31m[WARNING]\033[0m: Bellman Ford Shortest Path treats all edges in graph as directed edges\n";
-
-        std::map<VertexId, double> distance;
-        for (const auto vertexPair : vertexMap_)
-            distance.insert(std::make_pair(vertexPair.first, std::numeric_limits<double>::infinity()));
-
-        distance[startId] = 0.0;
-
-        if (vertexMap_.find(startId) == vertexMap_.end())
-            return distance;
-
-        EdgeId edgeCount = edgeMap_.size();
-        for (size_t i = 0; i < edgeCount - 1; i++)
-        {
-            for (const auto edge : edgeMap_)
-            {
-                VertexPair vertexPair = edge.second.getVertexIDs();
-                if (distance[vertexPair.first] + edge.second.weight() < distance[vertexPair.second])
-                    distance[vertexPair.second] = distance[vertexPair.first] + edge.second.weight();
-            }
-        }
-
-        for (size_t i = 0; i < edgeCount - 1; i++)
-        {
-            for (const auto edge : edgeMap_)
-            {
-                VertexPair vertexPair = edge.second.getVertexIDs();
-                if (distance[vertexPair.first] + edge.second.weight() < distance[vertexPair.second])
-                    distance[vertexPair.second] = -std::numeric_limits<double>::infinity();
-            }
-        }
-
-        return distance;
-    }
-
-    void Graph::__dfsRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder)
+    void Graph::__dfsRecursive(const VertexId &id, VertexIdMap<bool> &visited, VertexIdList &traversalOrder, bool postOrder)
     {
         if (visited[id])
             return;
@@ -649,7 +575,7 @@ namespace graph
             traversalOrder.push_back(id);
     }
 
-    void Graph::__dfsRecursive(const VertexId &id, std::map<VertexId, bool> &visited, VertexIdList &traversalOrder, bool postOrder) const
+    void Graph::__dfsRecursive(const VertexId &id, VertexIdMap<bool> &visited, VertexIdList &traversalOrder, bool postOrder) const
     {
         if (visited[id])
             return;
