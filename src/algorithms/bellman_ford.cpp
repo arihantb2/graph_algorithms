@@ -54,18 +54,35 @@ namespace algorithms
             }
         }
 
+        solved_ = true;
         return true;
     }
 
     Graph::ShortestPathResult BellmanFord::reconstructPath(const VertexId &endId)
     {
+        if (!solved_)
+            solve();
+
         Graph::ShortestPathResult result;
         result.pathFound_ = false;
         result.distance_ = distanceMap_.at(endId);
 
         result.path_.push_front(endId);
+        if (endId == startId_)
+        {
+            result.pathFound_ = true;
+            result.distance_ = 0;
+            return result;
+        }
 
         std::shared_ptr<VertexId> at = previous_.at(endId);
+        if (at && *at == startId_)
+        {
+            result.pathFound_ = true;
+            result.path_.push_front(startId_);
+            return result;
+        }
+
         while (at)
         {
             result.path_.push_front(*at);

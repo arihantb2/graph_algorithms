@@ -142,17 +142,6 @@ namespace graph
             bool pathFound_;
         };
 
-        /*
-         * V: len(vertices) in graph
-         * E: len(edges) in graph
-         * Time : O(E * log(V))
-         * Space: O()
-         * This computes the shortest path between the two input vertex IDs
-         * Note: This is a single source shortest path algorithm (SSSP)
-         * This is an implementation of lazy dijkstra which inserts duplicate key-value pairs in the priority queue instead of updating existing key-value pairs
-         * The lazy implementation can lead to high space complexity with dense graphs
-         * All edges in the graph need to have a non-negative weight which allows this algorithm to act in a greedy manner
-         */
         ShortestPathResult dijkstraShortestPath(const VertexId &, const VertexId &);
         ShortestPathResult dijkstraShortestPath(const VertexId &, const VertexId &) const;
 

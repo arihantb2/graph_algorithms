@@ -42,6 +42,8 @@ target_link_libraries(dag_shortest_path yaml-cpp)
 add_executable(dijkstra_shortest_path 
   src/dijkstra_shortest_path.cpp 
   src/graph/graph.cpp
+  src/graph/directed_acyclic_graph.cpp
+  src/algorithms/dijkstra.cpp
 )
 target_link_libraries(dijkstra_shortest_path yaml-cpp)
 
