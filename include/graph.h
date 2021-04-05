@@ -142,9 +142,6 @@ namespace graph
             bool pathFound_;
         };
 
-        ShortestPathResult dijkstraShortestPath(const VertexId &, const VertexId &);
-        ShortestPathResult dijkstraShortestPath(const VertexId &, const VertexId &) const;
-
     protected:
         void __clear();
 
