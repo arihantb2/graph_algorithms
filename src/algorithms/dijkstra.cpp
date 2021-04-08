@@ -77,12 +77,12 @@ namespace algorithms
         return true;
     }
 
-    Graph::ShortestPathResult Dijkstra::reconstructPath(const VertexId &endId)
+    ShortestPathResult Dijkstra::reconstructPath(const VertexId &endId)
     {
         if (!solved_)
             solve();
 
-        Graph::ShortestPathResult result;
+        ShortestPathResult result;
         result.pathFound_ = false;
         result.distance_ = distanceMap_.at(endId);
 

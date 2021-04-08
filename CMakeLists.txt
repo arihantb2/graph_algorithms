@@ -10,12 +10,22 @@ enable_testing()
 
 include_directories(include ${GTEST_INCLUDE_DIRS})
 
-# add_executable(dfs src/dfs.cpp)
-# target_link_libraries(dfs yaml-cpp)
+add_executable(dfs 
+  src/dfs.cpp 
+  src/graph/graph.cpp
+)
+target_link_libraries(dfs yaml-cpp)
+
+add_executable(find_bridges 
+  src/find_bridges.cpp 
+  src/graph/graph.cpp
+)
+target_link_libraries(find_bridges yaml-cpp)
 
 add_executable(bfs 
   src/bfs.cpp 
   src/graph/graph.cpp
+  src/algorithms/bfs.cpp
 )
 target_link_libraries(bfs yaml-cpp)
 

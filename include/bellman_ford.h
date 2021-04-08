@@ -33,7 +33,7 @@ namespace algorithms
          */
         bool solve();
 
-        Graph::ShortestPathResult reconstructPath(const VertexId &);
+        ShortestPathResult reconstructPath(const VertexId &);
 
     private:
         std::shared_ptr<const Graph> constGraphPtr_;

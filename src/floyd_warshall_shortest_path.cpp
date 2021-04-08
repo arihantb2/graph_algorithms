@@ -24,7 +24,7 @@ int main(int argc, char const *argv[])
     {
         for (auto iteratorJ = vertexMap.begin(); iteratorJ != vertexMap.end(); iteratorJ++)
         {
-            graph::Graph::ShortestPathResult result = solver.reconstructPath(iteratorI->first, iteratorJ->first);
+            data_types::ShortestPathResult result = solver.reconstructPath(iteratorI->first, iteratorJ->first);
             if (result.pathFound_)
             {
                 std::cout << "Path found!!\n";

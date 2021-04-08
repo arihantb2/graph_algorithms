@@ -118,12 +118,12 @@ namespace algorithms
         solved_ = true;
     }
 
-    Graph::ShortestPathResult FloydWarshall::reconstructPath(const VertexId &startId, const VertexId &endId)
+    ShortestPathResult FloydWarshall::reconstructPath(const VertexId &startId, const VertexId &endId)
     {
         if (!solved_)
             solve();
 
-        Graph::ShortestPathResult result;
+        ShortestPathResult result;
         result.path_.clear();
         result.distance_ = std::numeric_limits<double>::infinity();
         result.pathFound_ = false;

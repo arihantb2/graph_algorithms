@@ -29,7 +29,7 @@ int main(int argc, char const *argv[])
 
     for (auto idIterator = vertexMap.begin(); idIterator != vertexMap.end(); idIterator++)
     {
-        graph::Graph::ShortestPathResult result = solver.reconstructPath(idIterator->first);
+        data_types::ShortestPathResult result = solver.reconstructPath(idIterator->first);
         if (result.pathFound_)
         {
             std::cout << "Path found!!\n";

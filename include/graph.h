@@ -47,12 +47,6 @@ namespace graph
         virtual bool removeVertex(const VertexId &id) { return __removeVertex(id); }
         virtual bool removeEdge(const EdgeId &id) { return __removeEdge(id); }
 
-        class DFSResult
-        {
-        public:
-            VertexIdList traversalOrder_;
-        };
-
         /*
          * V: len(vertices) in graph
          * E: len(edges) in graph
@@ -68,49 +62,8 @@ namespace graph
          * * Find augmenting paths in a flow network
          * * Generate mazes
          */
-        DFSResult dfsTraversal(const VertexId &);
-
-        /*
-         * V: len(vertices) in graph
-         * E: len(edges) in graph
-         * Time : O(V+E)
-         * Space: O(V)
-         * DFS algorithm can be used as is or augmented to,
-         * * Compute MST
-         * * Detect and find cycles
-         * * Check if graph is bipartite
-         * * Find strongly connected components
-         * * Topologically sort nodes of graph
-         * * Find bridges and articulation points
-         * * Find augmenting paths in a flow network
-         * * Generate mazes
-         */
-        DFSResult dfsTraversal(const VertexId &) const;
-
-        class BFSResult
-        {
-        public:
-            VertexIdList traversalOrder_;
-            VertexIdMap<std::shared_ptr<VertexId>> previousVertexMap_;
-        };
-
-        /*
-         * V: len(vertices) in graph
-         * E: len(edges) in graph
-         * Time : O(V+E)
-         * Space: O(V)
-         * BFS algorithm is particularly useful for finding shortest path on unweighted graphs
-         */
-        BFSResult bfsTraversal(const VertexId &);
-
-        /*
-         * V: len(vertices) in graph
-         * E: len(edges) in graph
-         * Time : O(V+E)
-         * Space: O(V)
-         * BFS algorithm is particularly useful for finding shortest path on unweighted graphs
-         */
-        BFSResult bfsTraversal(const VertexId &) const;
+        VertexIdList dfsTraversal(const VertexId &);
+        VertexIdList dfsTraversal(const VertexId &) const;
 
         class ConnectedComponents
         {
@@ -134,13 +87,48 @@ namespace graph
         ConnectedComponents findConnectedComponents();
         ConnectedComponents findConnectedComponents() const;
 
-        class ShortestPathResult
+        struct FindBridgesHelper
         {
-        public:
-            Weight distance_;
-            VertexIdList path_;
-            bool pathFound_;
+            VertexId idIndex_ = 0;
+            VertexIdMap<VertexId> idIndexMap_;
+            VertexIdMap<VertexId> lowLinkIdMap_;
+            std::deque<VertexPair> bridges_;
         };
+
+        /*
+         * V: len(vertices) in graph
+         * E: len(edges) in graph
+         * Time : O(V+E)
+         * Space: O()
+         * Find bridges in an unidirected graph
+         */
+        std::deque<VertexPair> findBridges();
+        std::deque<VertexPair> findBridges() const;
+
+        struct FindArtPointsHelper
+        {
+            VertexId idIndex_ = 0;
+            EdgeId outEdgeCount_ = 0;
+            VertexIdMap<VertexId> idIndexMap_;
+            VertexIdMap<VertexId> lowLinkIdMap_;
+            VertexIdList artPoints_;
+
+            void addArtPoint(const VertexId &id)
+            {
+                if (std::find(artPoints_.begin(), artPoints_.end(), id) == artPoints_.end())
+                    artPoints_.push_back(id);
+            }
+        };
+
+        /*
+         * V: len(vertices) in graph
+         * E: len(edges) in graph
+         * Time : O(V+E)
+         * Space: O()
+         * Find articulation points in an unidirected graph
+         */
+        VertexIdList findArticulationPoints();
+        VertexIdList findArticulationPoints() const;
 
     protected:
         void __clear();
@@ -157,6 +145,12 @@ namespace graph
 
         void __dfsRecursive(const VertexId &, VertexIdMap<bool> &, VertexIdList &, bool postOrder = false);
         void __dfsRecursive(const VertexId &, VertexIdMap<bool> &, VertexIdList &, bool postOrder = false) const;
+
+        void __dfsRecursive(const VertexId &, const VertexId &, FindBridgesHelper &, VertexIdMap<bool> &);
+        void __dfsRecursive(const VertexId &, const VertexId &, FindBridgesHelper &, VertexIdMap<bool> &) const;
+
+        void __dfsRecursive(const VertexId &, const VertexId &, const VertexId &, FindArtPointsHelper &, VertexIdMap<bool> &);
+        void __dfsRecursive(const VertexId &, const VertexId &, const VertexId &, FindArtPointsHelper &, VertexIdMap<bool> &) const;
 
     private:
         VertexMap vertexMap_;

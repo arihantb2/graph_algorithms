@@ -144,4 +144,12 @@ namespace data_types
         Weight weight_;
         bool directed_;
     };
+
+    class ShortestPathResult
+    {
+    public:
+        Weight distance_;
+        VertexIdList path_;
+        bool pathFound_;
+    };
 }

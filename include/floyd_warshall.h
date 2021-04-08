@@ -28,7 +28,7 @@ namespace algorithms
          */
         void solve();
 
-        Graph::ShortestPathResult reconstructPath(const VertexId &, const VertexId &);
+        ShortestPathResult reconstructPath(const VertexId &, const VertexId &);
 
     private:
         AdjMatrix<Weight> adjMatrix_;

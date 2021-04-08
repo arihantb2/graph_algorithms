@@ -167,136 +167,32 @@ namespace graph
         return true;
     }
 
-    typename Graph::DFSResult Graph::dfsTraversal(const VertexId &startId)
+    VertexIdList Graph::dfsTraversal(const VertexId &startId)
     {
-        DFSResult result;
-        result.traversalOrder_.clear();
+        VertexIdList result;
+        result.clear();
 
         VertexIdMap<bool> visited;
         visited.clear();
         for (auto vertex : vertices())
             visited[vertex.first] = false;
 
-        __dfsRecursive(startId, visited, result.traversalOrder_);
+        __dfsRecursive(startId, visited, result);
 
         return result;
     }
 
-    typename Graph::DFSResult Graph::dfsTraversal(const VertexId &startId) const
+    VertexIdList Graph::dfsTraversal(const VertexId &startId) const
     {
-        DFSResult result;
-        result.traversalOrder_.clear();
+        VertexIdList result;
+        result.clear();
 
         VertexIdMap<bool> visited;
         visited.clear();
         for (auto vertex : vertices())
             visited[vertex.first] = false;
 
-        __dfsRecursive(startId, visited, result.traversalOrder_);
-
-        return result;
-    }
-
-    typename Graph::BFSResult Graph::bfsTraversal(const VertexId &startId)
-    {
-        BFSResult result;
-        result.traversalOrder_.clear();
-
-        VertexIdList vertexQueue;
-
-        VertexIdMap<bool> visited;
-        visited.clear();
-        result.previousVertexMap_.clear();
-        for (const auto vertexPair : vertices())
-        {
-            visited[vertexPair.first] = false;
-            result.previousVertexMap_[vertexPair.first] = nullptr;
-        }
-
-        visited[startId] = true;
-
-        vertexQueue.push_back(startId);
-        while (!vertexQueue.empty())
-        {
-            VertexId vertexId = vertexQueue.front();
-            vertexQueue.pop_front();
-
-            VertexPtr vertexPtr = vertex(vertexId);
-            if (!vertexPtr)
-                continue;
-
-            result.traversalOrder_.push_back(vertexId);
-
-            for (const auto edgeId : vertexPtr->adjList())
-            {
-                EdgePtr edgePtr = edge(edgeId);
-                if (!edgePtr)
-                    continue;
-
-                std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(vertexId);
-                if (nextVertex.second == false)
-                    continue;
-
-                if (visited[nextVertex.first])
-                    continue;
-
-                vertexQueue.push_back(nextVertex.first);
-                visited[nextVertex.first] = true;
-                result.previousVertexMap_[nextVertex.first] = std::make_shared<VertexId>(vertexId);
-            }
-        }
-
-        return result;
-    }
-
-    typename Graph::BFSResult Graph::bfsTraversal(const VertexId &startId) const
-    {
-        BFSResult result;
-        result.traversalOrder_.clear();
-
-        VertexIdList vertexQueue;
-
-        VertexIdMap<bool> visited;
-        visited.clear();
-        result.previousVertexMap_.clear();
-        for (const auto vertexPair : vertices())
-        {
-            visited[vertexPair.first] = false;
-            result.previousVertexMap_[vertexPair.first] = nullptr;
-        }
-
-        visited[startId] = true;
-
-        vertexQueue.push_back(startId);
-        while (!vertexQueue.empty())
-        {
-            VertexId vertexId = vertexQueue.front();
-            vertexQueue.pop_front();
-
-            VertexPtr vertexPtr = vertex(vertexId);
-            if (!vertexPtr)
-                continue;
-
-            result.traversalOrder_.push_back(vertexId);
-
-            for (const auto edgeId : vertexPtr->adjList())
-            {
-                EdgePtr edgePtr = edge(edgeId);
-                if (!edgePtr)
-                    continue;
-
-                std::pair<VertexId, bool> nextVertex = edgePtr->getNeighbor(vertexId);
-                if (nextVertex.second == false)
-                    continue;
-
-                if (visited[nextVertex.first])
-                    continue;
-
-                vertexQueue.push_back(nextVertex.first);
-                visited[nextVertex.first] = true;
-                result.previousVertexMap_[nextVertex.first] = std::make_shared<VertexId>(vertexId);
-            }
-        }
+        __dfsRecursive(startId, visited, result);
 
         return result;
     }
@@ -349,6 +245,108 @@ namespace graph
         }
 
         return connectedComponents;
+    }
+
+    std::deque<VertexPair> Graph::findBridges()
+    {
+        FindBridgesHelper helper;
+        VertexIdMap<bool> visited;
+
+        helper.idIndex_ = 0;
+        for (const auto vertexPair : vertices())
+        {
+            helper.idIndexMap_.insert(std::make_pair(vertexPair.first, 0));
+            helper.lowLinkIdMap_.insert(std::make_pair(vertexPair.first, 0));
+            visited.insert(std::make_pair(vertexPair.first, false));
+        }
+
+        for (const auto vertexPair : vertices())
+        {
+            if (!visited[vertexPair.first])
+                __dfsRecursive(vertexPair.first, -1, helper, visited);
+        }
+
+        return helper.bridges_;
+    }
+
+    std::deque<VertexPair> Graph::findBridges() const
+    {
+        FindBridgesHelper helper;
+        VertexIdMap<bool> visited;
+
+        helper.idIndex_ = 0;
+        for (const auto vertexPair : vertices())
+        {
+            helper.idIndexMap_.insert(std::make_pair(vertexPair.first, 0));
+            helper.lowLinkIdMap_.insert(std::make_pair(vertexPair.first, 0));
+            visited.insert(std::make_pair(vertexPair.first, false));
+        }
+
+        for (const auto vertexPair : vertices())
+        {
+            if (!visited[vertexPair.first])
+                __dfsRecursive(vertexPair.first, -1, helper, visited);
+        }
+
+        return helper.bridges_;
+    }
+
+    VertexIdList Graph::findArticulationPoints()
+    {
+        FindArtPointsHelper helper;
+        VertexIdMap<bool> visited;
+
+        helper.idIndex_ = 0;
+        helper.outEdgeCount_ = 0;
+        for (const auto vertexPair : vertices())
+        {
+            helper.idIndexMap_.insert(std::make_pair(vertexPair.first, 0));
+            helper.lowLinkIdMap_.insert(std::make_pair(vertexPair.first, 0));
+            visited.insert(std::make_pair(vertexPair.first, false));
+        }
+
+        for (const auto vertexPair : vertices())
+        {
+            if (!visited[vertexPair.first])
+            {
+                helper.outEdgeCount_ = 0;
+                __dfsRecursive(vertexPair.first, vertexPair.first, -1, helper, visited);
+
+                if (helper.outEdgeCount_ > 1)
+                    helper.addArtPoint(vertexPair.first);
+            }
+        }
+
+        return helper.artPoints_;
+    }
+
+    VertexIdList Graph::findArticulationPoints() const
+    {
+        FindArtPointsHelper helper;
+        VertexIdMap<bool> visited;
+
+        helper.idIndex_ = 0;
+        helper.outEdgeCount_ = 0;
+        for (const auto vertexPair : vertices())
+        {
+            helper.idIndexMap_.insert(std::make_pair(vertexPair.first, 0));
+            helper.lowLinkIdMap_.insert(std::make_pair(vertexPair.first, 0));
+            visited.insert(std::make_pair(vertexPair.first, false));
+        }
+
+        for (const auto vertexPair : vertices())
+        {
+            if (!visited[vertexPair.first])
+            {
+                helper.outEdgeCount_ = 0;
+                __dfsRecursive(vertexPair.first, vertexPair.first, -1, helper, visited);
+
+                if (helper.outEdgeCount_ > 1)
+                    helper.addArtPoint(vertexPair.first);
+            }
+        }
+
+        return helper.artPoints_;
     }
 
     void Graph::__dfsRecursive(const VertexId &id, VertexIdMap<bool> &visited, VertexIdList &traversalOrder, bool postOrder)
@@ -425,5 +423,171 @@ namespace graph
 
         if (postOrder)
             traversalOrder.push_back(id);
+    }
+
+    void Graph::__dfsRecursive(const VertexId &id, const VertexId &parentId, FindBridgesHelper &helper, VertexIdMap<bool> &visited)
+    {
+        visited[id] = true;
+        helper.idIndex_ = helper.idIndex_ + 1;
+        helper.lowLinkIdMap_[id] = helper.idIndex_;
+        helper.idIndexMap_[id] = helper.idIndex_;
+
+        VertexPtr vertexPtr = vertex(id);
+        if (!vertexPtr)
+            return;
+
+        for (const auto edgeId : vertexPtr->adjList())
+        {
+            EdgePtr edgePtr = edge(edgeId);
+
+            if (!edgePtr)
+                continue;
+
+            auto vertexPair = edgePtr->getNeighbor(id);
+
+            if (!vertexPair.second)
+                continue;
+
+            if (vertexPair.first == parentId)
+                continue;
+
+            if (!visited[vertexPair.first])
+            {
+                __dfsRecursive(vertexPair.first, id, helper, visited);
+                helper.lowLinkIdMap_[id] = std::min(helper.lowLinkIdMap_[id], helper.lowLinkIdMap_[vertexPair.first]);
+                if (helper.idIndexMap_[id] < helper.lowLinkIdMap_[vertexPair.first])
+                    helper.bridges_.push_back(std::make_pair(id, vertexPair.first));
+            }
+
+            else
+                helper.lowLinkIdMap_[id] = std::min(helper.lowLinkIdMap_[id], helper.idIndexMap_[vertexPair.first]);
+        }
+    }
+
+    void Graph::__dfsRecursive(const VertexId &id, const VertexId &parentId, FindBridgesHelper &helper, VertexIdMap<bool> &visited) const
+    {
+        visited[id] = true;
+        helper.idIndex_ = helper.idIndex_ + 1;
+        helper.lowLinkIdMap_[id] = helper.idIndex_;
+        helper.idIndexMap_[id] = helper.idIndex_;
+
+        VertexPtr vertexPtr = vertex(id);
+        if (!vertexPtr)
+            return;
+
+        for (const auto edgeId : vertexPtr->adjList())
+        {
+            EdgePtr edgePtr = edge(edgeId);
+
+            if (!edgePtr)
+                continue;
+
+            auto vertexPair = edgePtr->getNeighbor(id);
+
+            if (!vertexPair.second)
+                continue;
+
+            if (vertexPair.first == parentId)
+                continue;
+
+            if (!visited[vertexPair.first])
+            {
+                __dfsRecursive(vertexPair.first, id, helper, visited);
+                helper.lowLinkIdMap_[id] = std::min(helper.lowLinkIdMap_[id], helper.lowLinkIdMap_[vertexPair.first]);
+                if (helper.idIndexMap_[id] < helper.lowLinkIdMap_[vertexPair.first])
+                    helper.bridges_.push_back(std::make_pair(id, vertexPair.first));
+            }
+
+            else
+                helper.lowLinkIdMap_[id] = std::min(helper.lowLinkIdMap_[id], helper.idIndexMap_[vertexPair.first]);
+        }
+    }
+
+    void Graph::__dfsRecursive(const VertexId &rootId, const VertexId &id, const VertexId &parentId, FindArtPointsHelper &helper, VertexIdMap<bool> &visited)
+    {
+        if (rootId == parentId)
+            helper.outEdgeCount_++;
+
+        visited[id] = true;
+        helper.idIndex_ = helper.idIndex_ + 1;
+        helper.lowLinkIdMap_[id] = helper.idIndex_;
+        helper.idIndexMap_[id] = helper.idIndex_;
+
+        VertexPtr vertexPtr = vertex(id);
+        if (!vertexPtr)
+            return;
+
+        for (const auto edgeId : vertexPtr->adjList())
+        {
+            EdgePtr edgePtr = edge(edgeId);
+
+            if (!edgePtr)
+                continue;
+
+            auto vertexPair = edgePtr->getNeighbor(id);
+
+            if (!vertexPair.second)
+                continue;
+
+            if (vertexPair.first == parentId)
+                continue;
+
+            if (!visited[vertexPair.first])
+            {
+                __dfsRecursive(rootId, vertexPair.first, id, helper, visited);
+                helper.lowLinkIdMap_[id] = std::min(helper.lowLinkIdMap_[id], helper.lowLinkIdMap_[vertexPair.first]);
+
+                // Add articulation point because it is part of a bridge (less than case) or a cycle (equal to case)
+                if (helper.idIndexMap_[id] <= helper.lowLinkIdMap_[vertexPair.first])
+                    helper.addArtPoint(id);
+            }
+
+            else
+                helper.lowLinkIdMap_[id] = std::min(helper.lowLinkIdMap_[id], helper.idIndexMap_[vertexPair.first]);
+        }
+    }
+
+    void Graph::__dfsRecursive(const VertexId &rootId, const VertexId &id, const VertexId &parentId, FindArtPointsHelper &helper, VertexIdMap<bool> &visited) const
+    {
+        if (rootId == parentId)
+            helper.outEdgeCount_++;
+
+        visited[id] = true;
+        helper.idIndex_ = helper.idIndex_ + 1;
+        helper.lowLinkIdMap_[id] = helper.idIndex_;
+        helper.idIndexMap_[id] = helper.idIndex_;
+
+        VertexPtr vertexPtr = vertex(id);
+        if (!vertexPtr)
+            return;
+
+        for (const auto edgeId : vertexPtr->adjList())
+        {
+            EdgePtr edgePtr = edge(edgeId);
+
+            if (!edgePtr)
+                continue;
+
+            auto vertexPair = edgePtr->getNeighbor(id);
+
+            if (!vertexPair.second)
+                continue;
+
+            if (vertexPair.first == parentId)
+                continue;
+
+            if (!visited[vertexPair.first])
+            {
+                __dfsRecursive(rootId, vertexPair.first, id, helper, visited);
+                helper.lowLinkIdMap_[id] = std::min(helper.lowLinkIdMap_[id], helper.lowLinkIdMap_[vertexPair.first]);
+
+                // Add articulation point because it is part of a bridge (less than case) or a cycle (equal to case)
+                if (helper.idIndexMap_[id] <= helper.lowLinkIdMap_[vertexPair.first])
+                    helper.addArtPoint(id);
+            }
+
+            else
+                helper.lowLinkIdMap_[id] = std::min(helper.lowLinkIdMap_[id], helper.idIndexMap_[vertexPair.first]);
+        }
     }
 }

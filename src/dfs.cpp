@@ -14,10 +14,10 @@ int main(int argc, char const *argv[])
     graph::Graph graph = yaml_loader::loadGraphFromFile(std::string(argv[1]));
     std::cout << graph << std::endl;
 
-    graph::Graph::DFSResult result = graph.dfsTraversal(graph.vertices().begin()->first);
+    data_types::VertexIdList result = graph.dfsTraversal(graph.vertices().begin()->first);
 
     std::cout << "DFS Traversal Order with start vertex [" << graph.vertices().begin()->first << "]: [\n";
-    for (const auto vertexId : result.traversalOrder_)
+    for (const auto vertexId : result)
         std::cout << "\t" << vertexId << std::endl;
     std::cout << "]\n";
 
